@@ -1,4 +1,4 @@
-// NationalRegionB — Settings module
+// marvintlc — Settings module
 (async function () {
   const profile = await AppShell.init({ title: 'Settings' });
   if (!profile) return;

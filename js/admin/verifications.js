@@ -1,4 +1,4 @@
-// NationalRegionB — Admin transfer verifications module
+// marvintlc — Admin transfer verifications module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

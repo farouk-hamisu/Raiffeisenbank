@@ -1,4 +1,4 @@
-// NationalRegionB — Admin audit logs module
+// marvintlc — Admin audit logs module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

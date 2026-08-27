@@ -1,4 +1,4 @@
-// NationalRegionB — Admin deposits module
+// marvintlc — Admin deposits module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

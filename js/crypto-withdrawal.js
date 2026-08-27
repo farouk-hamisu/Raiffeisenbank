@@ -1,4 +1,4 @@
-// NationalRegionB — Crypto withdrawal module
+// marvintlc — Crypto withdrawal module
 (async function () {
   await AppShell.init({ title: 'Crypto Withdrawal' });
   const user = Auth.user;

@@ -1,4 +1,4 @@
-// NationalRegionB — Admin currencies & exchange rates module
+// marvintlc — Admin currencies & exchange rates module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

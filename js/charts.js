@@ -1,4 +1,4 @@
-// NationalRegionB — Minimal canvas chart helpers (line + bar + doughnut). No dependencies.
+// marvintlc — Minimal canvas chart helpers (line + bar + doughnut). No dependencies.
 (function (global) {
   'use strict';
 

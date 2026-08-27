@@ -1,4 +1,4 @@
-// NationalRegionB — Customer dashboard module
+// marvintlc — Customer dashboard module
 (async function () {
   const profile = await AppShell.init({ title: 'Dashboard' });
   if (!profile) return;

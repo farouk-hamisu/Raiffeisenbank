@@ -1,4 +1,4 @@
--- NationalRegionB - Migration 008
+-- marvintlc - Migration 008
 -- Additional customer-facing financial functions
 
 -- ---------------------------------------------------------------------------

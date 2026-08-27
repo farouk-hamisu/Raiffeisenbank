@@ -1,4 +1,4 @@
-// NationalRegionB — Profile module
+// marvintlc — Profile module
 (async function () {
   const profile = await AppShell.init({ title: 'Profile' });
   if (!profile) return;

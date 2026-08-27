@@ -1,4 +1,4 @@
--- NationalRegionB - Migration 005
+-- marvintlc - Migration 005
 -- Row Level Security policies (customer data)
 
 alter table public.profiles             enable row level security;

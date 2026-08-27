@@ -1,4 +1,4 @@
--- NationalRegionB - Migration 009
+-- marvintlc - Migration 009
 -- Profile extras + storage bucket for avatars
 
 alter table public.profiles

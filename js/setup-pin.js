@@ -1,4 +1,4 @@
-// NationalRegionB — Security PIN setup / change for existing accounts.
+// marvintlc — Security PIN setup / change for existing accounts.
 (function () {
   'use strict';
 

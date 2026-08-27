@@ -1,4 +1,4 @@
--- NationalRegionB - Migration 001
+-- marvintlc - Migration 001
 -- Enable required extensions
 
 create extension if not exists "pgcrypto";

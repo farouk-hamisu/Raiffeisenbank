@@ -1,4 +1,4 @@
-// NationalRegionB — Currency swap module
+// marvintlc — Currency swap module
 (async function () {
   await AppShell.init({ title: 'Currency Swap' });
   const user = Auth.user;

@@ -1,5 +1,5 @@
 /* ============================================================
-   NationalRegionB — Core design system (style.css)
+   marvintlc — Core design system (style.css)
    Flat, modern, professional financial-services aesthetic.
    ============================================================ */
 
@@ -437,7 +437,9 @@ table.table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .site-footer a { color: #aab6c8; display: block; margin-bottom: 8px; font-size: 14px; }
 .site-footer a:hover { color: #fff; }
 .site-footer .foot-bottom { border-top: 1px solid rgba(255,255,255,.1); margin-top: 40px; padding-top: 20px; font-size: 13px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
-.footer-brand img { filter: brightness(0) invert(1); }
+.footer-brand .brand { gap: 12px; }
+.footer-brand .brand-text { color: #fff; }
+.footer-brand .brand-text span { color: #e8c466; }
 @media (max-width: 900px) { .site-footer .foot-grid { grid-template-columns: 1fr 1fr; } }
 
 /* Bank card visual (legacy generic style) */

@@ -1,4 +1,4 @@
-// NationalRegionB — Admin loans module
+// marvintlc — Admin loans module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

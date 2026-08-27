@@ -1,4 +1,4 @@
-// NationalRegionB — Admin transactions module
+// marvintlc — Admin transactions module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

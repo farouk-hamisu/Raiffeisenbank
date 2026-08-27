@@ -1,4 +1,4 @@
-// NationalRegionB — Transfers hub: international transfers + crypto withdrawals
+// marvintlc — Transfers hub: international transfers + crypto withdrawals
 (async function () {
   await AppShell.init({ title: 'Transfers' });
   const user = Auth.user;

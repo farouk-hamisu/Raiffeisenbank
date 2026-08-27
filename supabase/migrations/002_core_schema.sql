@@ -1,4 +1,4 @@
--- NationalRegionB - Migration 002
+-- marvintlc - Migration 002
 -- Core database schema
 
 -- ---------------------------------------------------------------------------

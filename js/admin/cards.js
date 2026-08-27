@@ -1,4 +1,4 @@
-// NationalRegionB — Admin cards module
+// marvintlc — Admin cards module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

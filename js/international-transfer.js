@@ -1,4 +1,4 @@
-// NationalRegionB — International transfer module
+// marvintlc — International transfer module
 (async function () {
   await AppShell.init({ title: 'International Transfer' });
   const user = Auth.user;

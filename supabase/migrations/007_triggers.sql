@@ -1,4 +1,4 @@
--- NationalRegionB - Migration 007
+-- marvintlc - Migration 007
 -- Triggers
 
 -- New auth user -> profile
@@ -40,7 +40,7 @@ begin
     on conflict (account_id) do nothing;
 
     insert into public.notifications (user_id, title, message, type)
-    values (new.id, 'Welcome to NationalRegionB',
+    values (new.id, 'Welcome to marvintlc',
       'Your account has been created. Explore your dashboard to get started.', 'account');
   end if;
 

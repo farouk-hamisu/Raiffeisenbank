@@ -1,4 +1,4 @@
-// NationalRegionB — Admin settings module
+// marvintlc — Admin settings module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

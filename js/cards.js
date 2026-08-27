@@ -1,4 +1,4 @@
-// NationalRegionB — Cards module
+// marvintlc — Cards module
 (async function () {
   await AppShell.init({ title: 'Cards' });
   const user = Auth.user;

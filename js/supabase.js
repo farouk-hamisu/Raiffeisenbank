@@ -1,4 +1,4 @@
-// NationalRegionB — Supabase client bootstrap
+// marvintlc — Supabase client bootstrap
 // Assumes the Supabase JS client is loaded globally (see <script> tags in HTML).
 
 function createSupabaseClient() {

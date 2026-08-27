@@ -1,4 +1,4 @@
--- NationalRegionB - Migration 004
+-- marvintlc - Migration 004
 -- Helper + financial functions (atomic financial operations)
 
 -- ---------------------------------------------------------------------------
@@ -382,7 +382,7 @@ begin
 
   perform public.record_transaction(
     p_user_id, p_account_id, 'loan_repayment', 'debit', v_repayment.amount, v_repayment.currency,
-    'completed', 'Loan repayment', 'NationalRegionB',
+    'completed', 'Loan repayment', 'marvintlc',
     coalesce((select name from public.loan_products lp
       join public.loan_applications la on la.product_id = lp.id
       where la.id = v_repayment.loan_application_id), 'Loan repayment'),

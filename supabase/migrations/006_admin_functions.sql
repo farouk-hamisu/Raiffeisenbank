@@ -1,4 +1,4 @@
--- NationalRegionB - Migration 006
+-- marvintlc - Migration 006
 -- Admin authentication + CRUD via SECURITY DEFINER functions.
 -- All functions validate the admin session token server-side; client-side checks are not trusted.
 
@@ -1259,7 +1259,7 @@ begin
         perform public.apply_balance_change(v_acc, v_loan.amount, v_loan.currency);
         perform public.record_transaction(
           v_loan.user_id, v_acc, 'loan_disbursement', 'credit', v_loan.amount, v_loan.currency,
-          'completed', 'Loan disbursement ' || v_loan.reference, 'NationalRegionB', v_loan.user_id::text, 0, v_loan.id
+          'completed', 'Loan disbursement ' || v_loan.reference, 'marvintlc', v_loan.user_id::text, 0, v_loan.id
         );
         perform public.notify_user(v_loan.user_id, 'Loan disbursed',
           'Your approved loan of ' || to_char(v_loan.amount, 'FM9,999,999,990.00') || ' ' || v_loan.currency || ' has been disbursed.', 'loan');

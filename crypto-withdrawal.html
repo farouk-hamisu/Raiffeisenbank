@@ -23,6 +23,10 @@
     </div>
   </div>
   <div id="page-root">
+    <div class="alert alert-error hide" id="outgoing-banner">
+      <span>⚠ Outgoing transfers are currently disabled for your account.</span>
+      <span class="text-sm text-muted" id="outgoing-banner-reason"></span>
+    </div>
     <div id="crypto-form" class="card">
       <h3 class="card-title mb-2">Crypto withdrawal</h3>
       <p class="text-muted mb-3">Withdraw cryptocurrency. Withdrawals are released once a one-time verification code is entered.</p>
@@ -52,6 +56,7 @@
   <script src="js/supabase.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/navigation.js"></script>
+  <script src="js/btc-price.js"></script>
   <script src="js/crypto-withdrawal.js"></script>
 </body>
 </html>

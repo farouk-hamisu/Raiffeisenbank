@@ -178,6 +178,7 @@
       const modal = openModal(
         '<div class="pin-modal">' +
           '<div class="pin-icon">' + icon + '</div>' +
+          (opts.subtitle ? '<p class="pin-desc" style="font-weight:600;color:var(--text);margin-bottom:4px">' + escapeHtml(opts.subtitle) + '</p>' : '') +
           '<p class="pin-desc">' + escapeHtml(opts.message || 'Enter your 4-digit security PIN to continue.') + '</p>' +
           pinBoxesHTML('pin-prompt-boxes') +
           '<div class="form-error pin-error" id="pin-prompt-error"></div>' +
@@ -349,8 +350,8 @@
 
   function cardDigits(seed) {
     const h = hashCode(String(seed == null ? 'nb' : seed));
-    const brand = h % 2 === 0 ? 'visa' : 'mastercard';
-    const prefix = brand === 'visa' ? '4' : '5';
+    const brand = 'mastercard';
+    const prefix = '5';
     let x = h;
     const next = function () {
       x ^= x << 13; x >>>= 0;
@@ -370,10 +371,7 @@
   }
 
   function cardBrandMark(brand) {
-    if (brand === 'mastercard') {
-      return '<span class="cf-brandmark is-mastercard"><i></i><i></i></span>';
-    }
-    return '<span class="cf-brandmark is-visa">VISA</span>';
+    return '<span class="cf-brandmark is-mastercard"><i></i><i></i></span>';
   }
 
   // Renders a realistic card face. card may be a DB row (or null for fallback).
@@ -661,11 +659,11 @@
 
     const hint = modal.body.querySelector('#vc-hint');
     if (status && status.code_issued) {
-      hint.textContent = 'A code has been issued by our verification team (ends ' + (status.code_prefix || '') + '). ' +
+      hint.textContent = 'A verification code has been issued (ends ' + (status.code_prefix || '') + '). ' +
         (status.attempts_left != null ? status.attempts_left + ' attempts remaining. ' : '') +
         'Your code will expire at ' + formatDateTime(status.expires_at) + '.';
     } else {
-      hint.textContent = 'No verification code has been issued yet. The transfer is waiting for admin approval.';
+      hint.textContent = 'No verification code has been issued yet. Please contact support to obtain your code.';
     }
 
     send.addEventListener('click', async function () {
@@ -693,7 +691,7 @@
           input.value = '';
           input.focus();
         } else if (st === 'attempts_exceeded') {
-          err.textContent = 'Too many incorrect attempts. The code has been invalidated. Please request a new one from our verification team.';
+          err.textContent = 'Too many incorrect attempts. The code has been invalidated. Please contact support for a new code.';
           modal.close();
           if (onResult) onResult('attempts_exceeded', res);
         } else {
@@ -724,7 +722,8 @@
   // When transferId is provided the flow resumes an existing pending transfer
   // (skips submission, jumps straight to the verification step).
   async function fetchTransferRow(transferType, transferId) {
-    const table = transferType === 'crypto_withdrawal' ? 'crypto_withdrawals' : 'international_transfers';
+    const tableMap = { crypto_withdrawal: 'crypto_withdrawals', international_transfer: 'international_transfers', local_transfer: 'local_transfers' };
+    const table = tableMap[transferType] || 'international_transfers';
     const res = await SB.from(table).select('*').eq('id', transferId).single();
     if (res.error) throw res.error;
     return res.data;
@@ -789,7 +788,7 @@
       bodyEl.innerHTML =
         '<div class="text-center">' +
           '<div><span class="badge badge-pending">Pending verification</span></div>' +
-          '<p class="text-muted" style="margin:14px 0 0">Your transfer has been submitted and awaits the one-time verification code issued by our team. It stays pending until the correct code is entered.</p>' +
+          '<p class="text-muted" style="margin:14px 0 0">Your transfer has been submitted and is awaiting verification. Please contact support to obtain your verification code and complete the transfer.</p>' +
           '<div class="xflow-codebox">' +
             '<input type="text" class="input" maxlength="8" autocomplete="off" spellcheck="false" autocapitalize="characters" placeholder="••••-XXXX">' +
             '<button class="btn btn-primary" type="button">Verify</button>' +
@@ -805,7 +804,7 @@
 
       function refreshHint(st) {
         if (!st || !st.code_issued) {
-          hint.innerHTML = 'No verification code issued yet. We will detect it automatically once our team approves the transfer.';
+          hint.innerHTML = 'No verification code issued yet. Please contact support to obtain your code.';
           return;
         }
         if (st.status === 'active') {
@@ -850,16 +849,16 @@
             return;
           }
           if (st === 'attempts_exceeded') {
-            err.textContent = 'Too many incorrect attempts. The code has been invalidated — a new code will be issued by our verification team.';
+            err.textContent = 'Too many incorrect attempts. The code has been invalidated. Please contact support for a new code.';
             btn.disabled = false; btn.textContent = 'Verify';
             input.value = '';
             return;
           }
           const label = {
             used: 'This code has already been used.',
-            revoked: 'This code has been revoked. Request a new code from our verification team.',
-            expired: 'This code has expired. Request a new code from our verification team.',
-            no_code: 'No verification code has been issued yet. Your transfer stays pending until our team approves it.',
+            revoked: 'This code has been revoked. Please contact support for a new code.',
+            expired: 'This code has expired. Please contact support for a new code.',
+            no_code: 'No verification code has been issued yet. Please contact support to obtain your code.',
             failed_insufficient_funds: 'Verification passed, but the transfer could not be processed due to insufficient funds at release time.'
           }[st];
           if (label) {
@@ -887,12 +886,12 @@
       bodyEl.innerHTML =
         '<div class="text-center">' +
           '<div class="xflow-icon is-success">✓</div>' +
-          '<h3 style="margin:0 0 6px">Transfer verified</h3>' +
-          '<p class="text-muted" style="margin:0 0 12px">The verification code was accepted. Your transfer is now being processed.</p>' +
-          '<div><span class="badge badge-processing">Processing</span></div>' +
+          '<h3 style="margin:0 0 6px">Transfer completed</h3>' +
+          '<p class="text-muted" style="margin:0 0 12px">The verification code was accepted and your transfer has been completed successfully.</p>' +
+          '<div><span class="badge badge-completed">Completed</span></div>' +
           '<div class="xflow-actions">' +
             '<a href="transfers.html" class="btn btn-primary">View Transfers</a>' +
-            '<button class="btn btn-outline" type="button" data-done-close>Done</button>' +
+            '<a href="dashboard.html" class="btn btn-outline">Back to Dashboard</a>' +
           '</div>' +
         '</div>';
       q('[data-done-close]').addEventListener('click', close);

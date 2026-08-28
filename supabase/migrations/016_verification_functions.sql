@@ -122,7 +122,7 @@ begin
   if not found then
     raise exception 'INVALID_ACCOUNT';
   end if;
-  if v_account.currency <> v_base then
+  if v_account.currency <> v_base and v_account.currency <> p_asset then
     raise exception 'CRYPTO_REQUIRES_BASE_CURRENCY';
   end if;
 
@@ -135,9 +135,21 @@ begin
     from public.system_settings where key = 'crypto_withdrawal_fee';
   if v_fee is null then v_fee := 1; end if;
 
-  v_amount_fiat := round(p_amount * v_asset.rate_usd, 2);
-  if v_balance < (v_amount_fiat + v_fee) then
-    raise exception 'INSUFFICIENT_FUNDS';
+  -- If withdrawing from a BTC account, the amount is in BTC directly
+  if v_account.currency = p_asset then
+    if v_balance < (p_amount + v_fee) then
+      raise exception 'INSUFFICIENT_FUNDS';
+    end if;
+    v_amount_fiat := round(p_amount * v_asset.rate_usd, 2);
+    -- Debit BTC account directly
+    perform public.apply_balance_change(p_from_account_id, -(p_amount + v_fee), p_asset);
+  else
+    -- Fiat account: convert to fiat equivalent
+    v_amount_fiat := round(p_amount * v_asset.rate_usd, 2);
+    if v_balance < (v_amount_fiat + v_fee) then
+      raise exception 'INSUFFICIENT_FUNDS';
+    end if;
+    perform public.apply_balance_change(p_from_account_id, -(v_amount_fiat + v_fee), v_base);
   end if;
 
   insert into public.crypto_withdrawals (

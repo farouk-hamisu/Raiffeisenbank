@@ -5,15 +5,23 @@
   renderAdminShell('Verifications');
 
   async function load() {
-    const el = document.getElementById('verify-intl');
-    el.innerHTML = '<div class="loading-block"><div class="spinner"></div><span>Loading verifications...</span></div>';
+    const elIntl = document.getElementById('verify-intl');
+    const elLocal = document.getElementById('verify-local');
+    const elCrypto = document.getElementById('verify-crypto');
+    elIntl.innerHTML = '<div class="loading-block"><div class="spinner"></div><span>Loading...</span></div>';
+    elLocal.innerHTML = '<div class="loading-block"><div class="spinner"></div><span>Loading...</span></div>';
+    elCrypto.innerHTML = '<div class="loading-block"><div class="spinner"></div><span>Loading...</span></div>';
     try {
       const res = await adminApi('admin_list_transfer_verifications', {});
       renderIntl(res.international || []);
       renderCrypto(res.crypto || []);
+      renderLocal(res.local || []);
     } catch (e) {
-      el.innerHTML = UI.emptyState('Could not load verifications');
-      UI.toast(UI.apiErrorMessage(e), 'error');
+      const msg = UI.apiErrorMessage(e);
+      elIntl.innerHTML = UI.emptyState('Error: ' + msg);
+      elLocal.innerHTML = '';
+      elCrypto.innerHTML = '';
+      UI.toast(msg, 'error');
     }
   }
 
@@ -65,6 +73,28 @@
           '</div></td></tr>';
       }).join('') + '</tbody></table></div>';
     bind(rows, 'crypto_withdrawal');
+  }
+
+  function renderLocal(rows) {
+    const el = document.getElementById('verify-local');
+    if (!rows.length) { el.innerHTML = UI.emptyState('No local transfers awaiting verification'); return; }
+    el.innerHTML = '<div class="table-wrap"><table class="table mobile-cards"><thead><tr><th>Reference</th><th>Recipient</th><th>Amount</th><th>User</th><th>Code</th><th>Date</th><th>Actions</th></tr></thead><tbody>' +
+      rows.map(function (t) {
+        const c = codeInfo(t);
+        return '<tr><td data-label="Reference"><span class="cell-main">' + UI.escapeHtml(t.reference) + '</span></td>' +
+          '<td data-label="Recipient">' + UI.escapeHtml(t.recipient_name) + '</td>' +
+          '<td data-label="Amount">' + UI.money(t.amount, t.currency) + '</td>' +
+          '<td data-label="User">' + UI.escapeHtml(t.user_name || t.user_email || '') + '</td>' +
+          '<td data-label="Code">' + (c.issued ? '<span class="badge ' + (c.status === 'active' ? 'badge-success' : 'badge-neutral') + '">' + (c.prefix || c.status) + '</span>' : '<span class="text-muted">—</span>') + '</td>' +
+          '<td data-label="Date">' + UI.formatDateTime(t.created_at) + '</td>' +
+          '<td data-label="Actions"><div class="row-actions">' +
+            '<button class="row-action" data-approve="' + t.id + '" title="Approve (issue code)">' + ICONS.check + '</button>' +
+            '<button class="row-action" data-reject="' + t.id + '" title="Reject">' + ICONS.x + '</button>' +
+            (c.issued && c.status === 'active' ? '<button class="row-action" data-revoke="' + c.id + '" title="Revoke code">' + ICONS.pause + '</button>' : '') +
+            '<button class="row-action" data-history="' + t.id + '" title="History">' + ICONS.list + '</button>' +
+          '</div></td></tr>';
+      }).join('') + '</tbody></table></div>';
+    bind(rows, 'local_transfer');
   }
 
   function bind(rows, type) {

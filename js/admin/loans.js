@@ -118,6 +118,22 @@
       el.querySelectorAll('[data-view]').forEach(function (b) {
         b.addEventListener('click', function () {
           const a = rows.find(function (x) { return x.id === b.getAttribute('data-view'); });
+          const fd = a.form_data || {};
+          let formSection = '';
+          if (fd.full_name || fd.employment_status || fd.annual_income) {
+            formSection =
+              '<h4 style="margin:12px 0 6px">Application Details</h4>' +
+              '<div class="detail-grid">' +
+                (fd.full_name ? '<div class="detail-item"><div class="k">Full name</div><div class="v">' + UI.escapeHtml(fd.full_name) + '</div></div>' : '') +
+                (fd.date_of_birth ? '<div class="detail-item"><div class="k">Date of birth</div><div class="v">' + UI.escapeHtml(fd.date_of_birth) + '</div></div>' : '') +
+                (fd.phone ? '<div class="detail-item"><div class="k">Phone</div><div class="v">' + UI.escapeHtml(fd.phone) + '</div></div>' : '') +
+                (fd.address ? '<div class="detail-item"><div class="k">Address</div><div class="v">' + UI.escapeHtml(fd.address + ', ' + (fd.city || '') + ', ' + (fd.state || '') + ' ' + (fd.zip || '')) + '</div></div>' : '') +
+                (fd.employment_status ? '<div class="detail-item"><div class="k">Employment</div><div class="v">' + UI.escapeHtml(fd.employment_status) + '</div></div>' : '') +
+                (fd.employer_name ? '<div class="detail-item"><div class="k">Employer</div><div class="v">' + UI.escapeHtml(fd.employer_name) + '</div></div>' : '') +
+                (fd.annual_income ? '<div class="detail-item"><div class="k">Annual income</div><div class="v">' + UI.money(fd.annual_income, 'USD') + '</div></div>' : '') +
+                (fd.credit_score ? '<div class="detail-item"><div class="k">Credit score</div><div class="v">' + fd.credit_score + '</div></div>' : '') +
+              '</div>';
+          }
           UI.openModal(
             '<div class="detail-grid">' +
               '<div class="detail-item"><div class="k">Reference</div><div class="v">' + UI.escapeHtml(a.reference) + '</div></div>' +
@@ -129,10 +145,12 @@
               '<div class="detail-item"><div class="k">Rate</div><div class="v">' + a.interest_rate + '%</div></div>' +
               '<div class="detail-item"><div class="k">Monthly</div><div class="v">' + UI.money(a.monthly_payment, a.currency) + '</div></div>' +
               '<div class="detail-item"><div class="k">Purpose</div><div class="v">' + UI.escapeHtml(a.purpose || '—') + '</div></div>' +
-              '<div class="detail-item"><div class="k">Admin note</div><div class="v">' + UI.escapeHtml(a.admin_note || '—') + '</div></div>' +
+              (a.declined_reason ? '<div class="detail-item"><div class="k">Declined reason</div><div class="v">' + UI.escapeHtml(a.declined_reason) + '</div></div>' : '') +
+              '<div class="detail-item"><div class="k">Submitted</div><div class="v">' + (a.submitted_at ? UI.formatDateTime(a.submitted_at) : UI.formatDateTime(a.created_at)) + '</div></div>' +
               '<div class="detail-item"><div class="k">Disbursed</div><div class="v">' + (a.disbursed_at ? UI.formatDateTime(a.disbursed_at) : '—') + '</div></div>' +
-            '</div>',
-            { title: 'Loan Application' }
+            '</div>' +
+            formSection,
+            { title: 'Loan Application — ' + a.reference, large: true }
           );
         });
       });

@@ -4,7 +4,7 @@
   if (!profile) return;
 
   const user = Auth.user;
-  const state = { accounts: [], balances: {}, cards: [], loans: [], repayments: [] };
+  const state = { accounts: [], balances: {}, cards: [], loans: [], repayments: [], btcUsdRate: null, btcBalance: 0 };
 
   // ---------------- Load data ----------------
   async function loadData() {
@@ -22,17 +22,25 @@
     state.loans = loansRes.error ? [] : (loansRes.data || []);
     state.repayments = repayRes.error ? [] : (repayRes.data || []);
 
+    if (accountsRes.error) UI.toast('Could not load accounts: ' + UI.apiErrorMessage(accountsRes.error), 'error');
+    if (txRes.error) UI.toast('Could not load transactions: ' + UI.apiErrorMessage(txRes.error), 'error');
+    if (cardsRes.error) UI.toast('Could not load cards: ' + UI.apiErrorMessage(cardsRes.error), 'error');
+    if (loansRes.error) UI.toast('Could not load loans: ' + UI.apiErrorMessage(loansRes.error), 'error');
+    if (repayRes.error) UI.toast('Could not load repayments: ' + UI.apiErrorMessage(repayRes.error), 'error');
+    if (notifRes.error) UI.toast('Could not load notifications: ' + UI.apiErrorMessage(notifRes.error), 'error');
+
     let balData = [];
     if (state.accounts.length) {
       const balRes = await SB.from('account_balances').select('*').in('account_id', state.accounts.map(function (a) { return a.id; }));
       if (!balRes.error) balData = balRes.data || [];
+      else UI.toast('Could not load balances: ' + UI.apiErrorMessage(balRes.error), 'error');
     }
     balData.forEach(function (b) { state.balances[b.account_id] = b; });
 
-    const anyErr = [accountsRes, txRes, cardsRes, loansRes, repayRes, notifRes].some(function (r) { return r.error; });
-    if (anyErr) {
-      console.warn('Some dashboard data could not be loaded (tables may not be created yet).');
-    }
+    // Fetch BTC price
+    await fetchBtcPrice();
+    // Load BTC balance from accounts
+    loadBtcBalance();
 
     renderWelcome();
     renderBalances();
@@ -44,27 +52,80 @@
     renderChart(txRes.error ? [] : (txRes.data || []));
   }
 
-  // ---------------- Rendering ----------------
-  function totalBalance() {
-    let t = 0;
-    state.accounts.forEach(function (a) {
-      const b = state.balances[a.id];
-      if (b) t += Number(b.ledger_balance);
-    });
-    return t;
+  // ---------------- BTC price ----------------
+  async function fetchBtcPrice() {
+    try {
+      state.btcUsdRate = await BtcPrice.get();
+    } catch (e) {
+      try {
+        const r = await SB.from('exchange_rates').select('rate').eq('base_currency', 'BTC').eq('quote_currency', 'USD').single();
+        if (r.data) state.btcUsdRate = parseFloat(r.data.rate);
+      } catch (_) {}
+    }
   }
-  function availableBalance() {
+
+  // ---------------- BTC balance from account_balances ----------------
+  function loadBtcBalance() {
+    let btcHeld = 0;
+    state.accounts.forEach(function (a) {
+      if (a.currency === 'BTC') {
+        const b = state.balances[a.id];
+        if (b) btcHeld += Number(b.available_balance) || 0;
+      }
+    });
+    state.btcBalance = btcHeld;
+  }
+
+  // ---------------- Balances ----------------
+  function totalBalanceConverted() {
     let t = 0;
     state.accounts.forEach(function (a) {
       const b = state.balances[a.id];
-      if (b) t += Number(b.available_balance);
+      if (!b) return;
+      t += Number(b.ledger_balance) || 0;
     });
     return t;
   }
 
+  function availableBalanceConverted() {
+    let t = 0;
+    state.accounts.forEach(function (a) {
+      const b = state.balances[a.id];
+      if (!b) return;
+      t += Number(b.available_balance) || 0;
+    });
+    return t;
+  }
+
+  function savingsBalance() {
+    let t = 0;
+    state.accounts.filter(function (a) { return a.account_type === 'savings'; }).forEach(function (a) {
+      const b = state.balances[a.id];
+      if (!b) return;
+      t += Number(b.ledger_balance) || 0;
+    });
+    return t;
+  }
+
+  function checkingBalance() {
+    let t = 0;
+    state.accounts.filter(function (a) { return a.account_type === 'checking'; }).forEach(function (a) {
+      const b = state.balances[a.id];
+      if (!b) return;
+      t += Number(b.ledger_balance) || 0;
+    });
+    return t;
+  }
+
+  function btcUsdValue() {
+    return state.btcBalance * (state.btcUsdRate || 0);
+  }
+
+  // ---------------- Rendering ----------------
   function renderWelcome() {
-    // inject a welcome banner above the dash grid
     const root = document.getElementById('page-root');
+    const existing = root.querySelector('.welcome-banner');
+    if (existing) existing.remove();
     const banner = document.createElement('div');
     banner.className = 'welcome-banner';
     const hour = new Date().getHours();
@@ -78,27 +139,46 @@
 
   function renderBalances() {
     const el = document.getElementById('balance-cards');
-    const first = state.accounts[0];
-    const cur = first ? first.currency : 'USD';
     const primary = state.cards[0];
-    const savings = state.accounts.filter(function (a) { return a.account_type === 'savings'; })
-      .reduce(function (s, a) { return s + Number(state.balances[a.id] ? state.balances[a.id].ledger_balance : 0); }, 0);
     const savingsCount = state.accounts.filter(function (a) { return a.account_type === 'savings'; }).length;
+    const checkingCount = state.accounts.filter(function (a) { return a.account_type === 'checking'; }).length;
     const holder = primary ? primary.card_holder : (profile.full_name || 'Card Holder');
+
+    // Build per-account breakdown
+    let breakdownRows = '';
+    state.accounts.forEach(function (a) {
+      const b = state.balances[a.id];
+      if (!b) return;
+      const num = a.account_number ? a.account_number.slice(-4) : '????';
+      const typeLabel = a.account_type === 'savings' ? 'Savings' : a.account_type === 'checking' ? 'Current' : a.account_type;
+      breakdownRows += '<div class="breakdown-row">' +
+        '<span class="acct-label">' + UI.escapeHtml(a.account_name) + ' <span class="text-muted">(****' + num + ') &middot; ' + typeLabel + '</span></span>' +
+        '<span class="acct-bal">' + UI.money(b.available_balance, a.currency) + '</span></div>';
+    });
+
+    // BTC balance row
+    let btcRow = '';
+    if (state.btcBalance > 0 || state.btcUsdRate) {
+      btcRow = '<div class="breakdown-row">' +
+        '<span class="acct-label" style="color:#f7931a"><img src="assets/logos/bitcoin-logo-svgrepo-com.svg" alt="Bitcoin" style="width:20px;height:20px;vertical-align:middle;margin-right:4px"> Bitcoin (BTC)</span>' +
+        '<span class="acct-bal">' + state.btcBalance.toFixed(8) + ' BTC &asymp; ' + UI.money(btcUsdValue(), 'USD') + '</span></div>';
+    }
 
     el.innerHTML =
       '<div class="balance-cards">' +
         '<div class="balance-card primary-balance cc-balance">' +
-          UI.renderCardFace(primary, { holder: holder }) +
+          (primary ? UI.renderCardFace(primary, { holder: holder }) : '') +
           '<div class="bc-bottom">' +
             '<div class="bc-label">Total Balance</div>' +
-            '<div class="bc-amount">' + UI.money(totalBalance(), cur) + '</div>' +
-            '<div class="bc-sub">Across ' + state.accounts.length + ' account(s)</div>' +
+            '<div class="bc-amount">' + UI.money(totalBalanceConverted() + btcUsdValue(), 'USD') + '</div>' +
+            '<div class="bc-sub">' + state.accounts.length + ' account(s) + Bitcoin</div>' +
           '</div>' +
         '</div>' +
-        '<div class="balance-card"><div class="bc-label">Available Balance</div><div class="bc-amount">' + UI.money(availableBalance(), cur) + '</div><div class="bc-sub">Ready to spend</div></div>' +
-        '<div class="balance-card"><div class="bc-label">Total Savings</div><div class="bc-amount">' + UI.money(savings, cur) + '</div><div class="bc-sub">' + savingsCount + ' savings account(s)</div></div>' +
-      '</div>';
+        '<div class="balance-card"><div class="bc-label">Available Balance</div><div class="bc-amount">' + UI.money(availableBalanceConverted(), 'USD') + '</div><div class="bc-sub">Ready to spend</div></div>' +
+        '<div class="balance-card"><div class="bc-label">Savings</div><div class="bc-amount">' + UI.money(savingsBalance(), 'USD') + '</div><div class="bc-sub">' + savingsCount + ' savings account(s)</div></div>' +
+        '<div class="balance-card"><div class="bc-label">Current</div><div class="bc-amount">' + UI.money(checkingBalance(), 'USD') + '</div><div class="bc-sub">' + checkingCount + ' current account(s)</div></div>' +
+      '</div>' +
+      (breakdownRows || btcRow ? '<div class="balance-breakdown">' + breakdownRows + btcRow + '</div>' : '');
   }
 
   function renderPendingVerifications() {
@@ -106,16 +186,21 @@
     const el = document.getElementById('pending-verifications');
     Promise.all([
       SB.from('international_transfers').select('*').eq('user_id', user.id).eq('status', 'awaiting_admin_verification').order('created_at', { ascending: false }).limit(10),
-      SB.from('crypto_withdrawals').select('*').eq('user_id', user.id).eq('status', 'awaiting_admin_verification').order('created_at', { ascending: false }).limit(10)
+      SB.from('crypto_withdrawals').select('*').eq('user_id', user.id).eq('status', 'awaiting_admin_verification').order('created_at', { ascending: false }).limit(10),
+      SB.from('transactions').select('*').eq('user_id', user.id).eq('status', 'awaiting_admin_verification').eq('type', 'local_transfer').order('created_at', { ascending: false }).limit(10)
     ]).then(function (res) {
       const intl = res[0].error ? [] : (res[0].data || []);
       const crypto = res[1].error ? [] : (res[1].data || []);
+      const local = res[2].error ? [] : (res[2].data || []);
       const rows = [
         intl.map(function (t) {
-          return { type: 'international_transfer', id: t.id, reference: t.reference, title: 'International transfer to ' + UI.escapeHtml(t.recipient_name || 'recipient'), sub: UI.money(t.amount, t.currency) + ' · ' + UI.timeAgo(t.created_at), icon: 'intlTransfer' };
+          return { type: 'international_transfer', id: t.id, reference: t.reference, title: 'International transfer to ' + UI.escapeHtml(t.recipient_name || 'recipient'), sub: UI.money(t.amount, t.currency) + ' \u00b7 ' + UI.timeAgo(t.created_at), icon: 'intlTransfer' };
         }),
         crypto.map(function (t) {
-          return { type: 'crypto_withdrawal', id: t.id, reference: t.reference, title: 'Crypto withdrawal · ' + UI.escapeHtml(t.asset) + ' (' + UI.escapeHtml(t.network) + ')', sub: UI.money(t.amount_fiat, t.currency) + ' · ' + UI.timeAgo(t.created_at), icon: 'transactions' };
+          return { type: 'crypto_withdrawal', id: t.id, reference: t.reference, title: 'Crypto withdrawal \u00b7 ' + UI.escapeHtml(t.asset) + ' (' + UI.escapeHtml(t.network) + ')', sub: UI.money(t.amount_fiat, t.currency) + ' \u00b7 ' + UI.timeAgo(t.created_at), icon: 'transactions' };
+        }),
+        local.map(function (t) {
+          return { type: 'local_transfer', id: t.id, reference: t.reference, title: 'Local transfer to ' + UI.escapeHtml(t.recipient || 'recipient'), sub: UI.money(t.amount, t.currency) + ' \u00b7 ' + UI.timeAgo(t.created_at), icon: 'localTransfer' };
         })
       ].reduce(function (a, b) { return a.concat(b); }, []);
 
@@ -128,7 +213,7 @@
         return '<div class="tx-item">' +
           '<div class="tx-icon">' + icon(t.icon) + '</div>' +
           '<div class="tx-info" style="min-width:0"><div class="tx-title">' + t.title + '</div>' +
-          '<div class="tx-sub">' + t.sub + ' · ' + UI.badge('awaiting_admin_verification') + '</div></div>' +
+          '<div class="tx-sub">' + t.sub + ' \u00b7 ' + UI.badge('awaiting_admin_verification') + '</div></div>' +
           '<button class="btn btn-primary btn-sm" data-resume="' + t.type + ':' + t.id + '">Enter Code</button>' +
         '</div>';
       }).join('') + '</div>';
@@ -137,8 +222,9 @@
         b.addEventListener('click', function () {
           const parts = b.getAttribute('data-resume').split(':');
           const row = rows.find(function (r) { return r.type === parts[0] && String(r.id) === parts[1]; });
+          const titles = { international_transfer: 'International Transfer', crypto_withdrawal: 'Crypto Withdrawal', local_transfer: 'Local Transfer' };
           UI.transferFlow({
-            title: parts[0] === 'international_transfer' ? 'International Transfer' : 'Crypto Withdrawal',
+            title: titles[parts[0]] || 'Transfer',
             subtitle: row ? row.title : '',
             transferType: parts[0],
             transferId: parts[1],
@@ -166,7 +252,7 @@
       return '<div class="tx-item">' +
         '<div class="tx-icon">' + txIcon(t.type) + '</div>' +
         '<div class="tx-info"><div class="tx-title">' + UI.escapeHtml(t.recipient || t.sender || UI.typeLabel(t.type)) + '</div>' +
-        '<div class="tx-sub">' + UI.typeLabel(t.type) + ' · ' + UI.timeAgo(t.created_at) + ' · ' + UI.badge(t.status) + '</div></div>' +
+        '<div class="tx-sub">' + UI.typeLabel(t.type) + ' \u00b7 ' + UI.timeAgo(t.created_at) + ' \u00b7 ' + UI.badge(t.status) + '</div></div>' +
         '<div class="tx-amount ' + cls + '">' + amount + '</div>' +
       '</div>';
     }).join('') + '</div>';
@@ -202,7 +288,7 @@
       html += '<div class="flex-between mb-1"><span class="font-bold">' + UI.escapeHtml(l.reference) + '</span><span class="badge badge-success">Active</span></div>' +
         '<div class="text-sm text-muted mb-1">Outstanding: <strong class="text-primary">' + UI.money(Number(l.monthly_payment) * 1, l.currency) + '</strong> monthly</div>' +
         '<div class="progress"><div style="width:' + pct + '%"></div></div>' +
-        '<div class="progress-label"><span>' + paid + '/' + (reps.length || '—') + ' paid</span><span>' + Math.round(pct) + '%</span></div>';
+        '<div class="progress-label"><span>' + paid + '/' + (reps.length || '\u2014') + ' paid</span><span>' + Math.round(pct) + '%</span></div>';
     });
     if (pending.length) {
       html += '<div class="flex-between mt-3"><span class="text-sm font-bold">Pending applications</span><span class="badge badge-warning">' + pending.length + '</span></div>';
@@ -223,7 +309,6 @@
   }
 
   function renderChart(txs) {
-    // derive a last-6-months income/spend summary
     const now = new Date();
     const labels = [], income = [], spend = [];
     for (let i = 5; i >= 0; i--) {

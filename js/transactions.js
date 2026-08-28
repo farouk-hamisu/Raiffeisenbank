@@ -28,6 +28,7 @@
 
   async function load(page) {
     currentPage = page || 1;
+    const myRequest = ++requestId;
     const search = document.getElementById('f-search').value.trim();
     const type = document.getElementById('f-type').value;
     const status = document.getElementById('f-status').value;
@@ -49,6 +50,7 @@
       query = query.order(sort.key, { ascending: sort.dir === 'asc' }).range(fromIdx, fromIdx + PAGE - 1);
 
       const { data, count, error } = await query;
+      if (myRequest !== requestId) return; // stale response, discard
       if (error) throw error;
       totalRows = count || 0;
       render(data || []);
@@ -146,9 +148,15 @@
     load(currentPage);
   });
 
-  ['f-search', 'f-type', 'f-status', 'f-from', 'f-to'].forEach(function (id) {
-    document.getElementById(id).addEventListener('input', function () { load(1); });
+  let searchDebounce = null;
+  let requestId = 0;
+
+  ['f-type', 'f-status', 'f-from', 'f-to'].forEach(function (id) {
     document.getElementById(id).addEventListener('change', function () { load(1); });
+  });
+  document.getElementById('f-search').addEventListener('input', function () {
+    if (searchDebounce) clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(function () { load(1); }, 300);
   });
   document.getElementById('f-reset').addEventListener('click', function () {
     ['f-search', 'f-type', 'f-status', 'f-from', 'f-to'].forEach(function (id) { document.getElementById(id).value = ''; });

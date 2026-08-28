@@ -7,26 +7,19 @@
 -- seeding; accounts are created explicitly below. Re-enabled at the end.
 alter table public.profiles disable trigger on_profile_created;
 
+-- Only USD as fiat currency
 DO $$ BEGIN
   insert into public.currencies (code, name, symbol, is_base, enabled) values
-    ('USD', 'US Dollar',     '$',  true,  true),
-    ('EUR', 'Euro',          '€',  false, true),
-    ('GBP', 'British Pound', '£',  false, true),
-    ('NGN', 'Nigerian Naira','₦',  false, true),
-    ('CAD', 'Canadian Dollar','C$', false, true)
+    ('USD', 'US Dollar', '$', true, true),
+    ('BTC', 'Bitcoin', '\u20BF', false, true)
   on conflict (code) do nothing;
 EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'currencies: skipped'; END $$;
 
+-- BTC/USD rate (seeded; live rate fetched from CoinGecko at runtime)
 DO $$ BEGIN
   insert into public.exchange_rates (base_currency, quote_currency, rate, fee_percent) values
-    ('USD', 'EUR', 0.9200, 0.50),
-    ('USD', 'GBP', 0.7900, 0.50),
-    ('USD', 'NGN', 1580.00, 1.00),
-    ('USD', 'CAD', 1.3700, 0.50),
-    ('EUR', 'USD', 1.0870, 0.50),
-    ('GBP', 'USD', 1.2660, 0.50),
-    ('NGN', 'USD', 0.00063, 1.00),
-    ('CAD', 'USD', 0.7300, 0.50)
+    ('USD', 'BTC', 0.00001200, 0.50),
+    ('BTC', 'USD', 83333.33, 0.50)
   on conflict (base_currency, quote_currency) do nothing;
 EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'exchange_rates: skipped'; END $$;
 
@@ -80,7 +73,6 @@ DO $$ BEGIN
     ('currency', '"USD"', 'Default currency code'),
     ('local_transfer_fee', '0', 'Flat local transfer fee'),
     ('intl_transfer_fee', '15', 'Flat international transfer fee'),
-    ('swap_fee_percent', '0.5', 'Default currency swap fee percentage'),
     ('maintenance_mode', 'false', 'Maintenance mode flag')
   on conflict (key) do nothing;
 EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'system_settings: skipped'; END $$;
@@ -125,34 +117,33 @@ DO $$ BEGIN
     date_of_birth = excluded.date_of_birth;
 EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'profiles: skipped'; END $$;
 
+-- Demo accounts: Savings (USD), Current (USD)
 DO $$ BEGIN
   insert into public.accounts (id, user_id, account_number, account_name, account_type, currency, status) values
-    ('00000000-0000-0000-0000-000000000101', '00000000-0000-0000-0000-000000000001', '4800000000000011', 'Alex Morgan', 'checking', 'USD', 'active'),
-    ('00000000-0000-0000-0000-000000000102', '00000000-0000-0000-0000-000000000001', '4800000000000012', 'Alex Morgan Savings', 'savings', 'USD', 'active'),
-    ('00000000-0000-0000-0000-000000000103', '00000000-0000-0000-0000-000000000001', '4800000000000013', 'Alex Morgan Euro', 'checking', 'EUR', 'active')
+    ('00000000-0000-0000-0000-000000000101', '00000000-0000-0000-0000-000000000001', '4800000000000011', 'Savings Account', 'savings', 'USD', 'active'),
+    ('00000000-0000-0000-0000-000000000102', '00000000-0000-0000-0000-000000000001', '4800000000000012', 'Current Account', 'checking', 'USD', 'active')
   on conflict (id) do nothing;
 EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'accounts: skipped'; END $$;
 
 DO $$ BEGIN
   insert into public.account_balances (account_id, available_balance, ledger_balance, currency) values
     ('00000000-0000-0000-0000-000000000101', 24750.32, 25900.32, 'USD'),
-    ('00000000-0000-0000-0000-000000000102', 18750.00, 18750.00, 'USD'),
-    ('00000000-0000-0000-0000-000000000103', 3250.00, 3250.00, 'EUR')
+    ('00000000-0000-0000-0000-000000000102', 18750.00, 18750.00, 'USD')
   on conflict (account_id) do nothing;
 EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'account_balances: skipped'; END $$;
 
 DO $$ BEGIN
   insert into public.beneficiaries (user_id, name, bank_name, account_number, country, currency, is_international) values
     ('00000000-0000-0000-0000-000000000001', 'Jordan Blake', 'marvintlc', '4800000000000022', 'United States', 'USD', false),
-    ('00000000-0000-0000-0000-000000000001', 'Sophia Carter', 'marvintlc', '4800000000000023', 'United States', 'USD', false),
-    ('00000000-0000-0000-0000-000000000001', 'Liam O''Connor', 'Deutsche Bank', 'DE89370400440532013000', 'Germany', 'EUR', true);
+    ('00000000-0000-0000-0000-000000000001', 'Sophia Carter', 'marvintlc', '4800000000000023', 'United States', 'USD', false)
+  on conflict do nothing;
 EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'beneficiaries: skipped'; END $$;
 
 DO $$ BEGIN
   insert into public.transactions (reference, user_id, account_id, type, direction, amount, currency, fee, status, description, sender, recipient, created_at) values
     ('NTB-DEP0001', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', 'deposit', 'credit', 5000.00, 'USD', 0, 'completed', 'Salary deposit', 'Acme Corp', 'Alex Morgan', now() - interval '2 days'),
     ('NTB-LT0001',  '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', 'local_transfer', 'debit', 1200.00, 'USD', 0, 'completed', 'Rent payment', 'Alex Morgan', 'Jordan Blake', now() - interval '3 days'),
-    ('NTB-SW0001',  '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', 'currency_swap', 'debit', 2000.00, 'USD', 10.00, 'completed', 'Currency swap USD to EUR', 'Alex Morgan', 'USD -> EUR', now() - interval '5 days'),
+    ('NTB-BTC001',  '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', 'currency_swap', 'debit', 2000.00, 'USD', 10.00, 'completed', 'USD to BTC swap', 'Alex Morgan', 'USD -> BTC', now() - interval '5 days'),
     ('NTB-CTX0001', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', 'withdrawal', 'debit', 89.50, 'USD', 0, 'completed', 'ATM withdrawal', 'Alex Morgan', 'ATM', now() - interval '6 days'),
     ('NTB-DEP0002', '00000000-0000-0000-0000-000000000101', '00000000-0000-0000-0000-000000000101', 'deposit', 'credit', 250.00, 'USD', 0, 'completed', 'Cash deposit', 'Cash Deposit', 'Alex Morgan', now() - interval '7 days'),
     ('NTB-CTX0002', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', 'withdrawal', 'debit', 154.20, 'USD', 0, 'completed', 'Online purchase', 'Whole Foods Market', 'Alex Morgan', now() - interval '8 days'),
@@ -163,9 +154,9 @@ EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'transactions: skipped'; END $$;
 
 DO $$ BEGIN
   insert into public.cards (user_id, account_id, card_number, masked_number, card_holder, card_type, card_brand, expiry_month, expiry_year, cvv, spending_limit, status) values
-    ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', '4532015112830366', '4532 •••• •••• 0366', 'Alex Morgan', 'debit', 'visa', 8, 2028, '112', 10000.00, 'active'),
-    ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', '5391182039442218', '5391 •••• •••• 2218', 'Alex Morgan', 'credit', 'mastercard', 3, 2029, '334', 15000.00, 'active'),
-    ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000102', '4716880123456789', '4716 •••• •••• 6789', 'Alex Morgan', 'virtual', 'visa', 12, 2027, '558', 5000.00, 'frozen')
+    ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', '4532015112830366', '4532 \u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 0366', 'Alex Morgan', 'debit', 'visa', 8, 2028, '112', 10000.00, 'active'),
+    ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', '5391182039442218', '5391 \u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 2218', 'Alex Morgan', 'credit', 'mastercard', 3, 2029, '334', 15000.00, 'active'),
+    ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000102', '4716880123456789', '4716 \u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 6789', 'Alex Morgan', 'virtual', 'visa', 12, 2027, '558', 5000.00, 'frozen')
   on conflict (card_number) do nothing;
 EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'cards: skipped'; END $$;
 
@@ -184,13 +175,6 @@ DO $$ BEGIN
     ('DEP-SEED-0003', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', 1500.00, 'USD', 'bank_transfer', 'Refund', 'pending', now() - interval '30 minutes')
   on conflict (reference) do nothing;
 EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'deposits: skipped'; END $$;
-
-DO $$ BEGIN
-  insert into public.currency_swaps (reference, user_id, account_id, from_currency, to_currency, from_amount, to_amount, rate, fee, status, created_at) values
-    ('SW-SEED-0001', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', 'USD', 'EUR', 2000.00, 1835.00, 0.9200, 10.00, 'completed', now() - interval '5 days'),
-    ('SW-SEED-0002', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000103', 'EUR', 'USD', 500.00, 542.35, 1.0870, 2.50, 'completed', now() - interval '9 days')
-  on conflict (reference) do nothing;
-EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'currency_swaps: skipped'; END $$;
 
 DO $$ BEGIN
   insert into public.loan_applications (reference, user_id, product_id, amount, currency, term_months, interest_rate, monthly_payment, purpose, status, created_at) values
@@ -218,7 +202,7 @@ DO $$ BEGIN
     ('00000000-0000-0000-0000-000000000001', 'Transfer completed', 'Your transfer of 1,200.00 USD to Jordan Blake was completed. Ref: NTB-LT0001.', 'transfer', true, now() - interval '3 days'),
     ('00000000-0000-0000-0000-000000000001', 'Deposit received', 'Your deposit of 5,000.00 USD was completed. Ref: DEP-SEED-0001.', 'deposit', true, now() - interval '2 days'),
     ('00000000-0000-0000-0000-000000000001', 'Loan application received', 'Your Auto Loan application (LN-SEED-0002) is under review.', 'loan', false, now() - interval '3 days'),
-    ('00000000-0000-0000-0000-000000000001', 'Currency swap completed', 'Swapped 2,000.00 USD to 1,835.00 EUR.', 'swap', false, now() - interval '5 days'),
+    ('00000000-0000-0000-0000-000000000001', 'Bitcoin swap completed', 'Swapped 2,000.00 USD to 0.024 BTC.', 'swap', false, now() - interval '5 days'),
     ('00000000-0000-0000-0000-000000000001', 'Card security alert', 'A new device was used to access your account. If this was you, no action is needed.', 'security', false, now() - interval '1 day');
 
   insert into public.notifications (user_id, title, message, type, is_read, is_global) values

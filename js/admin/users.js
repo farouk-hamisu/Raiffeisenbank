@@ -30,14 +30,16 @@
     const el = document.getElementById('users-table');
     if (!rows.length) { el.innerHTML = UI.emptyState('No users found'); return; }
     el.innerHTML = '<table class="table mobile-cards">' +
-      '<thead><tr><th>Customer</th><th>Status</th><th>KYC</th><th>Accounts</th><th>Total balance</th><th>Joined</th><th>Actions</th></tr></thead><tbody>' +
+      '<thead><tr><th>Customer</th><th>Status</th><th>KYC</th><th>Accounts</th><th>Total balance</th><th>Transfers</th><th>Joined</th><th>Actions</th></tr></thead><tbody>' +
       rows.map(function (u) {
+        const transfersEnabled = u.outgoing_transfers_enabled !== false;
         return '<tr data-id="' + u.id + '" class="row-link">' +
           '<td data-label="Customer"><div class="flex gap-1">' + UI.avatar(u) + '<div><div class="cell-main">' + UI.escapeHtml(u.full_name || '—') + '</div><div class="cell-sub">' + UI.escapeHtml(u.email) + '</div></div></div></td>' +
           '<td data-label="Status">' + UI.badge(u.status) + '</td>' +
           '<td data-label="KYC">' + UI.badge(u.kyc_status) + '</td>' +
           '<td data-label="Accounts">' + u.account_count + '</td>' +
           '<td data-label="Total balance">' + UI.money(u.total_balance, 'USD') + '</td>' +
+          '<td data-label="Transfers"><button class="btn btn-sm ' + (transfersEnabled ? 'btn-success' : 'btn-failed') + '" data-toggle-transfers="' + u.id + '" data-enabled="' + transfersEnabled + '">' + (transfersEnabled ? 'Enabled' : 'Disabled') + '</button></td>' +
           '<td data-label="Joined">' + UI.formatDate(u.created_at) + '</td>' +
           '<td data-label="Actions"><div class="row-actions">' +
             '<button class="row-action" data-view="' + u.id + '" title="View">' + ICONS.eye + '</button>' +
@@ -106,6 +108,25 @@
             load();
           } catch (err) { UI.toast(UI.apiErrorMessage(err), 'error'); }
         }, 'Delete');
+      });
+    });
+    el.querySelectorAll('[data-toggle-transfers]').forEach(function (b) {
+      b.addEventListener('click', async function (e) {
+        e.stopPropagation();
+        const id = b.getAttribute('data-toggle-transfers');
+        const currentlyEnabled = b.getAttribute('data-enabled') === 'true';
+        const action = currentlyEnabled ? 'disable' : 'enable';
+        UI.confirmDialog('Are you sure you want to ' + action + ' outgoing transfers for this customer?', async function () {
+          try {
+            await adminApi('admin_toggle_outgoing_transfers', {
+              p_user_id: id,
+              p_enabled: !currentlyEnabled,
+              p_reason: currentlyEnabled ? 'Disabled by admin' : null
+            });
+            UI.toast('Transfers ' + action + 'd.', 'success');
+            load();
+          } catch (err) { UI.toast(UI.apiErrorMessage(err), 'error'); }
+        }, action.charAt(0).toUpperCase() + action.slice(1));
       });
     });
   }

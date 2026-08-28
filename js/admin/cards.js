@@ -103,7 +103,7 @@
     const modal = UI.openModal(
       '<div class="field"><label>Customer email</label><input type="email" class="input" id="c-email"></div>' +
       '<div class="field"><label>Card type</label><select class="select" id="c-type"><option value="debit">Debit</option><option value="credit">Credit</option><option value="virtual">Virtual</option></select></div>' +
-      '<div class="field"><label>Brand</label><select class="select" id="c-brand"><option value="visa">Visa</option><option value="mastercard">Mastercard</option></select></div>' +
+      '<div class="field"><label>Brand</label><select class="select" id="c-brand"><option value="mastercard">Mastercard</option><option value="visa">Visa</option></select></div>' +
       '<div class="field"><label>Expiry month</label><input type="number" class="input" id="c-month" min="1" max="12" value="12"></div>' +
       '<div class="field"><label>Expiry year</label><input type="number" class="input" id="c-year" value="' + (new Date().getFullYear() + 4) + '"></div>' +
       '<div class="field"><label>Spending limit</label><input type="number" class="input" id="c-limit" value="10000"></div>' +

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bitcoin — marvintlc</title>
+  <link rel="icon" type="image/svg+xml" href="assets/logos/favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div class="page-loader" id="page-loader" role="status" aria-live="polite">
+    <div class="pl-inner">
+      <div class="pl-orbit">
+        <span class="pl-ring"></span>
+        <span class="pl-ring pl-ring--2"></span>
+        <span class="pl-ring pl-ring--3"></span>
+        <span class="pl-core"></span>
+      </div>
+      <div class="pl-track"><span class="pl-progress"></span></div>
+      <p class="pl-status" id="pl-status">Preparing your workspace</p>
+    </div>
+  </div>
+  <div id="page-root">
+    <div class="dash-grid">
+      <div class="dash-main-col">
+        <div class="card mb-3" id="btc-balance-card">
+          <div class="card-header">
+            <div><h3 class="card-title">Bitcoin Balance</h3><div class="card-subtitle">Your BTC holdings valued in USD</div></div>
+            <button class="btn btn-outline btn-sm" id="refresh-btc-rate" title="Refresh price">Refresh</button>
+          </div>
+          <div id="btc-balance"><div class="loading-block"><div class="spinner"></div><span>Loading Bitcoin data...</span></div></div>
+        </div>
+        <div class="card mb-3">
+          <div class="card-header">
+            <div><h3 class="card-title">Swap USD &harr; BTC</h3><div class="card-subtitle">Convert between US Dollars and Bitcoin</div></div>
+            <span class="text-sm text-muted" id="btc-rate-age"></span>
+          </div>
+          <div class="swap-box" id="swap-box">
+            <div class="swap-row">
+              <div class="swap-field">
+                <label class="text-muted text-sm">From</label>
+                <div class="swap-input-group">
+                  <select class="select select-sm" id="swap-from-currency">
+                    <option value="USD">USD</option>
+                    <option value="BTC">BTC</option>
+                  </select>
+                  <input type="number" class="input" id="swap-from-amount" min="0" step="0.00000001" placeholder="0.00">
+                </div>
+              </div>
+              <button class="btn btn-swap" id="swap-reverse" title="Reverse">&#8646;</button>
+              <div class="swap-field">
+                <label class="text-muted text-sm">To</label>
+                <div class="swap-input-group">
+                  <input type="text" class="input" id="swap-to-amount" readonly placeholder="0.00">
+                  <span class="swap-currency" id="swap-to-label">BTC</span>
+                </div>
+              </div>
+            </div>
+            <div class="swap-summary" id="swap-summary"></div>
+            <button class="btn btn-primary btn-full" id="swap-btn" disabled>Enter Amount</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div><h3 class="card-title">Bitcoin Transaction History</h3><div class="card-subtitle">Your recent USD/BTC swaps</div></div>
+          </div>
+          <div id="btc-tx-history"><div class="loading-block"><div class="spinner"></div><span>Loading transactions...</span></div></div>
+        </div>
+      </div>
+      <div class="dash-side-col">
+        <div class="card">
+          <div class="card-header"><div><h3 class="card-title">BTC Price</h3><div class="card-subtitle">Current market price</div></div></div>
+          <div id="btc-price-info"><div class="loading-block"><div class="spinner spinner-sm"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/icons.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/navigation.js"></script>
+  <script src="js/btc-price.js"></script>
+  <script src="js/exchange-rates.js"></script>
+  <script src="js/bitcoin.js"></script>
+</body>
+</html>

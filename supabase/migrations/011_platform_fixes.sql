@@ -482,7 +482,7 @@ $$;
 -- ---------------------------------------------------------------------------
 -- 6. Card number generation (Luhn-valid, brand-prefixed, collision-safe)
 -- ---------------------------------------------------------------------------
-create or replace function public.generate_card_number(p_brand text default 'visa')
+create or replace function public.generate_card_number(p_brand text default 'mastercard')
 returns text
 language plpgsql
 set search_path = public

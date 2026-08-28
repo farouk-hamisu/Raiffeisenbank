@@ -23,6 +23,10 @@
     </div>
   </div>
   <div id="page-root">
+    <div class="alert alert-error hide" id="outgoing-banner">
+      <span>⚠ Outgoing transfers are currently disabled for your account.</span>
+      <span class="text-sm text-muted" id="outgoing-banner-reason"></span>
+    </div>
     <div class="step-flow">
       <div class="step-pill active" data-step="1"><span class="num">1</span> Recipient</div><div class="step-line"></div>
       <div class="step-pill" data-step="2"><span class="num">2</span> Amount</div><div class="step-line"></div>
@@ -83,19 +87,22 @@
     </div>
 
     <div id="step-4" class="card hide text-center">
-      <div style="font-size:44px;color:var(--success)">✓</div>
-      <h3 class="card-title">Transfer submitted successfully</h3>
-      <p class="text-muted">Your transfer has been processed and a transaction reference has been generated.</p>
+      <div style="font-size:44px;color:var(--primary)">⏳</div>
+      <h3 class="card-title">Transfer submitted</h3>
+      <p class="text-muted">Your transfer has been submitted and is awaiting verification. Please contact support to obtain your verification code and complete the transfer.</p>
       <div class="review-panel" style="max-width:420px;margin:0 auto">
         <div class="detail-grid">
           <div class="detail-item"><div class="k">Reference</div><div class="v" id="done-ref">—</div></div>
-          <div class="detail-item"><div class="k">Status</div><div class="v"><span class="badge badge-completed">Completed</span></div></div>
+          <div class="detail-item"><div class="k">Status</div><div class="v"><span class="badge badge-warning">Awaiting Verification</span></div></div>
           <div class="detail-item"><div class="k">Amount</div><div class="v" id="done-amount">—</div></div>
           <div class="detail-item"><div class="k">Recipient</div><div class="v" id="done-name">—</div></div>
         </div>
       </div>
+      <div id="verify-notice" class="alert alert-info hide" style="max-width:420px;margin:16px auto 0">
+        <strong>Verification Required:</strong> Contact support or check back later to enter your verification code. Your funds have not been debited yet.
+      </div>
       <div class="flex gap-2 mt-3" style="justify-content:center">
-        <a href="transactions.html" class="btn btn-outline">View Transactions</a>
+        <a href="transfers.html" class="btn btn-outline">View Transfers</a>
         <a href="dashboard.html" class="btn btn-primary">Back to Dashboard</a>
       </div>
     </div>

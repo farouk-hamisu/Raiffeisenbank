@@ -9,7 +9,7 @@ const NAV_ITEMS = [
   { label: 'Transfers', icon: 'send', href: 'transfers.html' },
   { label: 'Crypto Withdrawal', icon: 'globe', href: 'crypto-withdrawal.html' },
   { label: 'Deposits', icon: 'deposits', href: 'deposits.html' },
-  { label: 'Currency Swap', icon: 'swap', href: 'currency-swap.html' },
+  { label: 'Bitcoin', icon: 'bitcoin', href: 'bitcoin.html' },
   { label: 'Loans', icon: 'loans', href: 'loans.html' }
 ];
 
@@ -194,13 +194,15 @@ const AppShell = {
         .order('created_at', { ascending: false })
         .limit(8);
       if (error) throw error;
-      const unread = (await SB.from('notifications')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', Auth.user.id)
-        .eq('is_read', false)).count || 0;
-      this.unread = unread;
-      const dot = document.getElementById('notif-dot');
-      if (dot) dot.style.display = unread > 0 ? 'block' : 'none';
+      try {
+        const unread = (await SB.from('notifications')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', Auth.user.id)
+          .eq('is_read', false)).count || 0;
+        this.unread = unread;
+        const dot = document.getElementById('notif-dot');
+        if (dot) dot.style.display = unread > 0 ? 'block' : 'none';
+      } catch (_) { /* unread count failure is non-critical */ }
 
       const listEl = document.getElementById('notif-list');
       if (!listEl) return;

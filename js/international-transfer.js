@@ -20,17 +20,25 @@
 
   async function load() {
     try {
-      const [accRes, benRes, curRes] = await Promise.all([
+      // Check outgoing transfers enabled
+      const profile = await Auth.fetchProfile();
+      const banner = document.getElementById('outgoing-banner');
+      if (profile.outgoing_transfers_enabled === false) {
+        banner.classList.remove('hide');
+        document.getElementById('outgoing-banner-reason').textContent =
+          (profile.outgoing_transfers_disabled_reason ? 'Reason: ' + profile.outgoing_transfers_disabled_reason : 'Please contact support for details.');
+      } else {
+        banner.classList.add('hide');
+      }
+
+      const [accRes, benRes] = await Promise.all([
         SB.from('accounts').select('*').eq('user_id', user.id).eq('status', 'active'),
-        SB.from('beneficiaries').select('*').eq('user_id', user.id).eq('is_international', true),
-        SB.from('currencies').select('code, symbol').order('code')
+        SB.from('beneficiaries').select('*').eq('user_id', user.id).eq('is_international', true)
       ]);
       if (accRes.error) throw accRes.error;
       if (benRes.error) throw benRes.error;
-      if (curRes.error) throw curRes.error;
 
       state.accounts = accRes.data || [];
-      const currencies = curRes.data || [];
 
       const balRes = await SB.from('account_balances').select('*').in('account_id', state.accounts.map(function (a) { return a.id; }));
       if (balRes.error) throw balRes.error;
@@ -47,10 +55,8 @@
       }).join('');
 
       const curSel = document.getElementById('r-currency');
-      curSel.innerHTML = currencies.map(function (c) {
-        return '<option value="' + c.code + '">' + c.code + ' (' + c.symbol + ')</option>';
-      }).join('');
-      curSel.value = 'EUR';
+      curSel.innerHTML = '<option value="USD">USD ($)</option>';
+      curSel.value = 'USD';
 
       // fee
       const settingsRes = await SB.from('system_settings').select('value').eq('key', 'intl_transfer_fee');

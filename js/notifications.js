@@ -26,6 +26,7 @@
       render(data || []);
       renderPagination();
     } catch (e) {
+      UI.toast(UI.apiErrorMessage(e), 'error');
       el.innerHTML = UI.emptyState('Could not load notifications');
     }
   }
@@ -53,7 +54,8 @@
       btn.addEventListener('click', async function () {
         const id = btn.getAttribute('data-mark');
         const item = list.find(function (n) { return n.id === id; });
-        await SB.from('notifications').update({ is_read: !item.is_read }).eq('id', id).eq('user_id', user.id);
+        const { error } = await SB.from('notifications').update({ is_read: !item.is_read }).eq('id', id).eq('user_id', user.id);
+        if (error) { UI.toast(UI.apiErrorMessage(error), 'error'); return; }
         load();
       });
     });
@@ -61,7 +63,8 @@
       btn.addEventListener('click', async function () {
         const id = btn.getAttribute('data-del');
         UI.confirmDialog('Delete this notification?', async function () {
-          await SB.from('notifications').delete().eq('id', id).eq('user_id', user.id);
+          const { error } = await SB.from('notifications').delete().eq('id', id).eq('user_id', user.id);
+          if (error) { UI.toast(UI.apiErrorMessage(error), 'error'); return; }
           load();
         }, 'Delete');
       });

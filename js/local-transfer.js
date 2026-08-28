@@ -20,18 +20,26 @@
 
   async function load() {
     try {
-      const [accRes, benRes, curRes] = await Promise.all([
+      // Check outgoing transfers enabled
+      const profile = await Auth.fetchProfile();
+      const banner = document.getElementById('outgoing-banner');
+      if (profile.outgoing_transfers_enabled === false) {
+        banner.classList.remove('hide');
+        document.getElementById('outgoing-banner-reason').textContent =
+          (profile.outgoing_transfers_disabled_reason ? 'Reason: ' + profile.outgoing_transfers_disabled_reason : 'Please contact support for details.');
+      } else {
+        banner.classList.add('hide');
+      }
+
+      const [accRes, benRes] = await Promise.all([
         SB.from('accounts').select('*').eq('user_id', user.id).eq('status', 'active'),
-        SB.from('beneficiaries').select('*').eq('user_id', user.id).eq('is_international', false),
-        SB.from('currencies').select('code, symbol').order('code')
+        SB.from('beneficiaries').select('*').eq('user_id', user.id).eq('is_international', false)
       ]);
       if (accRes.error) throw accRes.error;
       if (benRes.error) throw benRes.error;
-      if (curRes.error) throw curRes.error;
 
       state.accounts = accRes.data || [];
       state.beneficiaries = benRes.data || [];
-      const currencies = curRes.data || [];
 
       const balRes = await SB.from('account_balances').select('*').in('account_id', state.accounts.map(function (a) { return a.id; }));
       if (balRes.error) throw balRes.error;
@@ -43,17 +51,16 @@
         return '<option value="' + b.id + '">' + UI.escapeHtml(b.name) + ' · ' + UI.escapeHtml(b.account_number) + '</option>';
       }).join('');
 
-      // from account select
+      // from account select — USD accounts only
+      const usdAccounts = state.accounts.filter(function (a) { return a.currency === 'USD'; });
       const fromSel = document.getElementById('t-from');
-      fromSel.innerHTML = state.accounts.map(function (a) {
-        return '<option value="' + a.id + '">' + UI.escapeHtml(a.account_name) + ' · ' + UI.escapeHtml(a.account_number) + ' (' + UI.escapeHtml(a.currency) + ')</option>';
+      fromSel.innerHTML = usdAccounts.map(function (a) {
+        return '<option value="' + a.id + '">' + UI.escapeHtml(a.account_name) + ' · ' + UI.escapeHtml(a.account_number) + ' ($)</option>';
       }).join('');
 
-      // currency select
+      // currency field — USD only, hidden
       const curSel = document.getElementById('r-currency');
-      curSel.innerHTML = currencies.map(function (c) {
-        return '<option value="' + c.code + '">' + c.code + ' (' + c.symbol + ')</option>';
-      }).join('');
+      curSel.innerHTML = '<option value="USD">USD ($)</option>';
       curSel.value = 'USD';
 
       updateBalance();
@@ -152,10 +159,12 @@
     const acc = state.accounts.find(function (a) { return a.id === fromId; });
     const desc = document.getElementById('t-desc').value.trim();
 
-    // try to resolve internal recipient
+    // try to resolve internal recipient (uses SECURITY DEFINER RPC to bypass RLS)
     let internalRecipient = null;
-    const lookup = await SB.from('accounts').select('user_id').eq('account_number', state.recipient.account);
-    if (!lookup.error && lookup.data && lookup.data.length) internalRecipient = lookup.data[0].user_id;
+    try {
+      const lookup = await SB.rpc('lookup_account_user_id', { p_account_number: state.recipient.account });
+      if (!lookup.error && lookup.data) internalRecipient = lookup.data;
+    } catch (_) { /* not an internal account */ }
 
     try {
       const pin = await UI.promptPin({
@@ -179,8 +188,11 @@
       document.getElementById('done-ref').textContent = transfer.reference;
       document.getElementById('done-amount').textContent = UI.money(amount, acc.currency);
       document.getElementById('done-name').textContent = state.recipient.name;
+      // Show verification notice
+      const verifyNotice = document.getElementById('verify-notice');
+      if (verifyNotice) verifyNotice.classList.remove('hide');
       showStep(4);
-      UI.toast('Transfer completed successfully.', 'success');
+      UI.toast('Transfer submitted. Awaiting verification code.', 'success');
     } catch (e) {
       btn.disabled = false;
       btn.textContent = 'Confirm & Send';

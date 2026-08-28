@@ -6,7 +6,9 @@ const APP_CONFIG = {
   supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3bGxuZmtnbGdiaXBoeXltdWFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTYzMDYsImV4cCI6MjEwMzQzMjMwNn0.zbcjoz_HFp-hvTMVxLmUULZ5Jgkp9ERo4YrALQqXGt4',
   bankName: 'marvintlc',
   currencySymbols: {
-    USD: '$', EUR: '€', GBP: '£', NGN: '₦', CAD: 'C$'
+    USD: '$',
+    BTC: '\u20BF'
   },
-  pageSize: 10
+  pageSize: 10,
+  btcPriceApi: 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd'
 };

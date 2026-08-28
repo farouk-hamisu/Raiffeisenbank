@@ -338,7 +338,8 @@ create or replace function public.create_currency_swap(
   p_from_currency text,
   p_to_currency   text,
   p_from_amount   numeric,
-  p_pin           text default null
+  p_pin           text default null,
+  p_rate          numeric default null
 )
 returns public.currency_swaps
 language plpgsql
@@ -371,10 +372,22 @@ begin
     raise exception 'SAME_CURRENCY';
   end if;
 
+  -- Try table lookup first; fall back to frontend-supplied rate if missing
   select rate, fee_percent into v_rate, v_fee_pct
     from public.exchange_rates
     where base_currency = p_from_currency and quote_currency = p_to_currency;
-  if not found then
+
+  if v_rate is null and p_rate is not null and p_rate > 0 then
+    v_rate := p_rate;
+    v_fee_pct := 0.5;
+    -- Upsert the rate for next time
+    insert into public.exchange_rates (base_currency, quote_currency, rate, fee_percent)
+    values (p_from_currency, p_to_currency, p_rate, v_fee_pct)
+    on conflict (base_currency, quote_currency) do update
+      set rate = excluded.rate, fee_percent = excluded.fee_percent, updated_at = now();
+  end if;
+
+  if v_rate is null then
     raise exception 'RATE_NOT_AVAILABLE';
   end if;
 
@@ -800,7 +813,7 @@ grant execute on function public.customer_verify_pin(text) to anon, authenticate
 grant execute on function public.customer_has_pin() to anon, authenticated;
 
 grant execute on function public.create_local_transfer(uuid, uuid, text, text, text, numeric, text, text, uuid, text) to anon, authenticated;
-grant execute on function public.create_currency_swap(uuid, uuid, text, text, numeric, text) to anon, authenticated;
+grant execute on function public.create_currency_swap(uuid, uuid, text, text, numeric, text, numeric) to anon, authenticated;
 grant execute on function public.pay_loan_repayment(uuid, uuid, uuid, text) to anon, authenticated;
 grant execute on function public.create_international_transfer(uuid, uuid, text, text, text, text, text, numeric, text, text, text) to anon, authenticated;
 grant execute on function public.create_customer_deposit(uuid, uuid, numeric, text, text, text, text) to anon, authenticated;

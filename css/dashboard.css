@@ -1,117 +1,402 @@
 /* ============================================================
    marvintlc — dashboard.css
-   Customer dashboard layout (desktop + mobile reference layouts)
+   Simplified dashboard layout matching reference screenshot
    ============================================================ */
 
-.dash-grid {
+/* Main layout container */
+.dash-layout {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 16px 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Header */
+.dash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0 0;
+}
+
+.dash-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dash-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.dash-greeting h1 {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  margin: 0;
+}
+
+.dash-greeting p {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.dash-notif-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.dash-notif-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Balance Card */
+.dash-balance-card {
+  background: linear-gradient(135deg, #0f1b2d 0%, #1a2d4a 100%);
+  border-radius: 20px;
+  padding: 24px;
+  color: white;
+}
+
+.dash-balance-label {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-bottom: 8px;
+}
+
+.dash-balance-amount {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.dash-balance-change {
+  font-size: 13px;
+}
+
+.dash-change-positive {
+  color: #4ade80;
+}
+
+.dash-change-negative {
+  color: #f87171;
+}
+
+/* Quick Actions */
+.dash-quick-actions {
   display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 24px;
-}
-@media (max-width: 1100px) {
-  .dash-grid { grid-template-columns: 1fr; }
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
 }
 
-/* Balances row */
-.balance-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 24px; }
-@media (max-width: 900px) { .balance-cards { grid-template-columns: 1fr; } }
-
-.balance-card {
-  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 20px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
-}
-.balance-card.primary-balance {
-  background: linear-gradient(135deg, var(--primary), #1c4f9c); color: #fff; border: none;
-}
-.balance-card .bc-label { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; opacity: .85; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-.balance-card .bc-label svg { width: 15px; height: 15px; }
-.balance-card .bc-amount { font-size: 26px; font-weight: 800; letter-spacing: -.01em; }
-.balance-card .bc-sub { font-size: 12px; opacity: .75; margin-top: 4px; }
-
-/* Dashboard two-column sections */
-.dash-main-col { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
-.dash-side-col { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
-
-/* Chart area */
-.chart-box { position: relative; width: 100%; height: 240px; }
-.chart-box canvas { width: 100% !important; height: 100% !important; }
-.chart-legend { display: flex; gap: 18px; margin-top: 12px; font-size: 13px; color: var(--text-2); flex-wrap: wrap; }
-.chart-legend .lg { display: flex; align-items: center; gap: 6px; }
-.chart-legend .swatch { width: 10px; height: 10px; border-radius: 3px; }
-
-/* Recent transactions on dashboard */
-.dash-tx { max-height: 420px; overflow-y: auto; }
-
-/* Active card showcase */
-.card-showcase { padding: 20px; }
-.card-showcase .card-face { margin-bottom: 16px; }
-.card-showcase .card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-
-/* ============================================================
-   Credit-card balance hero
-   ============================================================ */
-.cc-balance {
-  background: var(--surface) !important;
-  color: var(--text) !important; border: 1px solid var(--border) !important; overflow: hidden;
-  display: flex; flex-direction: column; gap: 18px;
-}
-.cc-balance .card-face { box-shadow: 0 18px 40px rgba(11, 42, 94, .22); }
-.cc-balance .bc-bottom { margin-top: auto; padding-top: 4px; }
-.cc-balance .bc-label { margin: 0; padding: 0; color: var(--muted) !important; opacity: 1; font-weight: 700; letter-spacing: .04em; display: flex; align-items: center; gap: 8px; }
-.cc-balance .bc-label svg { width: 15px; height: 15px; }
-.cc-balance .bc-amount { color: var(--text) !important; font-size: 30px; font-weight: 800; line-height: 1.1; overflow: hidden; }
-.cc-balance .bc-sub { opacity: .75; }
-
-/* Loan summary */
-.loan-summary .progress {
-  height: 8px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); overflow: hidden; margin: 10px 0 6px;
-}
-.loan-summary .progress > div { height: 100%; background: var(--accent); border-radius: 999px; }
-.loan-summary .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
-
-/* Mobile ordering (stacked) */
-@media (max-width: 640px) {
-  .balance-cards .primary-balance { order: -1; }
-  .dash-side-col { order: 2; }
+.dash-quick-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--text);
 }
 
-@media (max-width: 420px) {
-  .cc-balance .bc-amount { font-size: 24px; }
-  .cc-balance { gap: 12px; }
+.dash-qa-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  transition: all 0.2s ease;
 }
 
-/* ============================================================
-   Polish (visual-only refinements; no markup changes)
-   ============================================================ */
+.dash-qa-icon:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
 
-/* balance cards */
-.balance-card { transition: transform .16s ease, box-shadow .16s ease; }
-.balance-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-.balance-card .bc-amount { letter-spacing: -.02em; }
-.balance-card .bc-label { font-weight: 700; }
-.balance-card.primary-balance .bc-label { opacity: .9; }
+.dash-qa-icon svg {
+  width: 24px;
+  height: 24px;
+}
 
-/* chart area */
-.chart-box { height: 260px; }
-.chart-legend { gap: 22px; }
-.chart-legend .swatch { width: 12px; height: 12px; border-radius: 4px; }
+.dash-quick-action span {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-2);
+}
 
-/* recent transactions panel */
-.dash-tx { max-height: 420px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
-.dash-tx::-webkit-scrollbar { width: 6px; }
-.dash-tx::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; }
+/* Card Preview */
+.dash-card-preview {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-/* card showcase */
-.card-showcase .card-face { box-shadow: 0 18px 40px rgba(11, 42, 94, .2); }
-.card-showcase .card-actions .btn { flex: 1; justify-content: center; }
+.dash-card-bank {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
 
-/* section headers inside dashboard cards */
-.dash-main-col .card-title, .dash-side-col .card-title { letter-spacing: -.01em; }
+.dash-card-number {
+  font-size: 14px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
 
-/* loan summary polish */
-.loan-summary .progress > div { background: linear-gradient(90deg, var(--accent), var(--primary)); }
+.dash-card-status {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--success);
+  background: var(--success-soft);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
 
-@media (max-width: 640px) {
-  .chart-box { height: 210px; }
-  .balance-card .bc-amount { font-size: 22px; }
+/* Recent Activity */
+.dash-recent-activity {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.dash-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.dash-section-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.dash-view-all {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.dash-view-all:hover {
+  text-decoration: underline;
+}
+
+/* Transaction list */
+.dash-tx-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dash-tx-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dash-tx-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-2);
+  flex-shrink: 0;
+}
+
+.dash-tx-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.dash-tx-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dash-tx-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dash-tx-sub {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.dash-tx-amount {
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.dash-tx-amount.credit {
+  color: var(--success);
+}
+
+.dash-tx-amount.debit {
+  color: var(--text);
+}
+
+/* Empty state */
+.dash-empty {
+  text-align: center;
+  padding: 24px 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+  .dash-layout {
+    max-width: 600px;
+    padding: 0 24px 100px;
+    gap: 24px;
+  }
+  
+  .dash-header {
+    padding: 24px 0 0;
+  }
+  
+  .dash-avatar {
+    width: 56px;
+    height: 56px;
+    font-size: 18px;
+  }
+  
+  .dash-greeting h1 {
+    font-size: 15px;
+  }
+  
+  .dash-greeting p {
+    font-size: 20px;
+  }
+  
+  .dash-balance-card {
+    padding: 28px;
+  }
+  
+  .dash-balance-amount {
+    font-size: 36px;
+  }
+  
+  .dash-qa-icon {
+    width: 64px;
+    height: 64px;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .dash-layout {
+    max-width: 700px;
+    padding: 0 32px 100px;
+    gap: 28px;
+  }
+  
+  .dash-header {
+    padding: 32px 0 0;
+  }
+  
+  .dash-avatar {
+    width: 64px;
+    height: 64px;
+    font-size: 20px;
+  }
+  
+  .dash-greeting h1 {
+    font-size: 16px;
+  }
+  
+  .dash-greeting p {
+    font-size: 22px;
+  }
+  
+  .dash-balance-card {
+    padding: 32px;
+    border-radius: 24px;
+  }
+  
+  .dash-balance-amount {
+    font-size: 40px;
+  }
+  
+  .dash-qa-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 20px;
+  }
+  
+  .dash-quick-action span {
+    font-size: 13px;
+  }
+  
+  .dash-card-preview,
+  .dash-recent-activity {
+    padding: 24px;
+    border-radius: 20px;
+  }
+  
+  .dash-section-header h3 {
+    font-size: 18px;
+  }
+  
+  .dash-tx-title {
+    font-size: 15px;
+  }
+  
+  .dash-tx-sub {
+    font-size: 13px;
+  }
+  
+  .dash-tx-amount {
+    font-size: 15px;
+  }
+}
+
+/* Large Desktop */
+@media (min-width: 1440px) {
+  .dash-layout {
+    max-width: 800px;
+  }
 }

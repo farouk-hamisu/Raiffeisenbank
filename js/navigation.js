@@ -28,16 +28,15 @@ const AppShell = {
   bottomNavItems() {
     return [
       { label: 'Dashboard', icon: 'dashboard', href: 'dashboard.html' },
-      { label: 'Transactions', icon: 'transactions', href: 'transactions.html' },
+      { label: 'Loans', icon: 'loans', href: 'loans.html' },
       { label: 'Cards', icon: 'cards', href: 'cards.html' },
-      { label: 'Transfer', icon: 'localTransfer', href: 'local-transfer.html' },
-      { label: 'Loans', icon: 'loans', href: 'loans.html' }
+      { label: 'Profile', icon: 'profile', href: 'profile.html' }
     ];
   },
 
   bottomNavHTML() {
     const current = window.location.pathname.split('/').pop();
-    const blue = { 'cards.html': true };
+    const blue = {};
     const items = this.bottomNavItems().map(function (it) {
       const active = current === it.href ? 'active' : '';
       const cls = blue[it.href] ? 'is-blue' : '';
@@ -150,21 +149,25 @@ const AppShell = {
       backdrop.classList.remove('open');
     });
 
-    // user menu dropdown
-    const um = document.getElementById('user-menu');
-    document.getElementById('user-menu').addEventListener('click', function (e) {
-      e.stopPropagation();
-      this.classList.toggle('open');
-    });
-    document.addEventListener('click', function (e) {
-      if (um && !um.contains(e.target)) um.classList.remove('open');
-    });
-
     // header logout
-    const hdrLogout = document.getElementById('hdr-logout');
-    if (hdrLogout) hdrLogout.addEventListener('click', function () { Auth.logout(); });
     const navLogout = document.getElementById('nav-logout');
     if (navLogout) navLogout.addEventListener('click', function (e) { e.preventDefault(); Auth.logout(); });
+
+    // user menu dropdown
+    const um = document.getElementById('user-menu');
+    if (um) {
+      um.addEventListener('click', function (e) {
+        e.stopPropagation();
+        this.classList.toggle('open');
+      });
+      document.addEventListener('click', function (e) {
+        if (um && !um.contains(e.target)) um.classList.remove('open');
+      });
+    }
+
+    // header logout in dropdown
+    const hdrLogout = document.getElementById('hdr-logout');
+    if (hdrLogout) hdrLogout.addEventListener('click', function () { Auth.logout(); });
 
     // notifications
     const bell = document.getElementById('notif-bell');

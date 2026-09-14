@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Help Center — marvintlc</title>
+  <link rel="icon" type="image/svg+xml" href="assets/logos/favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+<div class="page-loader" id="page-loader" role="status" aria-live="polite">
+    <div class="pl-inner">
+      <div class="pl-orbit">
+        <span class="pl-ring"></span>
+        <span class="pl-ring pl-ring--2"></span>
+        <span class="pl-ring pl-ring--3"></span>
+        <span class="pl-core"></span>
+      </div>
+      <div class="pl-track"><span class="pl-progress"></span></div>
+      <p class="pl-status" id="pl-status">Loading help center</p>
+    </div>
+  </div>
+  <div id="page-root">
+    <div class="dash-layout">
+      <div class="help-header">
+        <h1>Help Center</h1>
+        <p>How can we assist you today?</p>
+      </div>
+
+      <div class="help-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" class="input" id="help-search" placeholder="Search for help...">
+      </div>
+
+      <div class="help-section">
+        <h2>Popular Topics</h2>
+        <div class="help-topics">
+          <a href="local-transfer.html" class="help-topic-card">
+            <div class="help-topic-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+            </div>
+            <h3>Send Money</h3>
+            <p>Learn how to send money to friends and family</p>
+          </a>
+          <a href="deposits.html" class="help-topic-card">
+            <div class="help-topic-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/><path d="M17 12h.01"/><path d="M7 12h.01"/></svg>
+            </div>
+            <h3>Deposit Funds</h3>
+            <p>Add money to your account</p>
+          </a>
+          <a href="bitcoin.html" class="help-topic-card">
+            <div class="help-topic-icon">
+              <img src="assets/logos/bitcoin-logo-svgrepo-com.svg" alt="Bitcoin" style="width:24px;height:24px">
+            </div>
+            <h3>Bitcoin</h3>
+            <p>Buy, sell, and manage your Bitcoin</p>
+          </a>
+          <a href="loans.html" class="help-topic-card">
+            <div class="help-topic-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12l7 7 7-7"/></svg>
+            </div>
+            <h3>Loans</h3>
+            <p>Apply for loans and check status</p>
+          </a>
+        </div>
+      </div>
+
+      <div class="help-section">
+        <h2>Frequently Asked Questions</h2>
+        <div class="help-faq">
+          <div class="help-faq-item">
+            <div class="help-faq-q" onclick="this.parentElement.classList.toggle('open')">
+              <span>How do I send money?</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+            <div class="help-faq-a">
+              <p>Go to the Send Money page, enter the recipient's details, amount, and confirm with your PIN. You'll receive a verification code to complete the transfer.</p>
+            </div>
+          </div>
+          <div class="help-faq-item">
+            <div class="help-faq-q" onclick="this.parentElement.classList.toggle('open')">
+              <span>How long do transfers take?</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+            <div class="help-faq-a">
+              <p>Local transfers are instant. International transfers typically take 1-3 business days depending on the destination country.</p>
+            </div>
+          </div>
+          <div class="help-faq-item">
+            <div class="help-faq-q" onclick="this.parentElement.classList.toggle('open')">
+              <span>Is my money safe?</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+            <div class="help-faq-a">
+              <p>Yes. We use bank-level encryption and security measures to protect your funds and personal information. All accounts are monitored 24/7.</p>
+            </div>
+          </div>
+          <div class="help-faq-item">
+            <div class="help-faq-q" onclick="this.parentElement.classList.toggle('open')">
+              <span>How do I reset my PIN?</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+            <div class="help-faq-a">
+              <p>Go to Settings > Security > Reset PIN. You'll need to verify your identity with a code sent to your email.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="help-section">
+        <h2>Contact Support</h2>
+        <div class="help-contact">
+          <div class="help-contact-card">
+            <div class="help-contact-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            </div>
+            <h3>Call Us</h3>
+            <p>+1 (800) 555-0142</p>
+            <span class="help-contact-sub">24/7 Support</span>
+          </div>
+          <div class="help-contact-card">
+            <div class="help-contact-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
+            </div>
+            <h3>Email Us</h3>
+            <p>support@marvintlc.com</p>
+            <span class="help-contact-sub">Response within 24 hours</span>
+          </div>
+          <div class="help-contact-card">
+            <div class="help-contact-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <h3>Live Chat</h3>
+            <p>Chat with our team</p>
+            <span class="help-contact-sub">Available 9am - 6pm EST</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/icons.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/navigation.js"></script>
+  <script>
+    (async function () {
+      const profile = await AppShell.init({ title: 'Help Center' });
+      if (!profile) return;
+      PageLoader.hide();
+    })();
+  </script>
+</body>
+</html>

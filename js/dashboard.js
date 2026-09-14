@@ -79,15 +79,24 @@
 
   // ---------------- Rendering ----------------
   function renderHeader() {
+    const avatarEl = document.getElementById('dash-avatar');
     const greetingEl = document.getElementById('dash-greeting-text');
     const nameEl = document.getElementById('dash-user-name');
 
     const firstName = (profile.full_name || '').split(' ')[0] || 'there';
+    const initials = firstName.charAt(0).toUpperCase();
     const hour = new Date().getHours();
     const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
-    greetingEl.textContent = greeting;
+    // Show profile picture if available, otherwise show initials
+    if (profile.avatar_url) {
+      avatarEl.innerHTML = '<img src="' + UI.escapeHtml(profile.avatar_url) + '" alt="Profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover">';
+    } else {
+      avatarEl.textContent = initials;
+    }
+    
     nameEl.textContent = firstName;
+    greetingEl.textContent = greeting;
   }
 
   function renderBalance() {

@@ -87,13 +87,7 @@ const AppShell = {
     else if (options.content) contentEl.innerHTML = options.content;
 
     this.bindEvents();
-    this.loadNotifications();
 
-    // Keep title in sync
-    if (options.title) {
-      const t = document.getElementById('hdr-title');
-      if (t) t.textContent = options.title;
-    }
     return this.profile;
   },
 
@@ -115,24 +109,12 @@ const AppShell = {
   },
 
   headerHTML() {
-    const name = (this.profile && this.profile.full_name) || 'User';
-    const email = (this.profile && this.profile.email) || '';
     return '<header class="app-header">' +
       '<button class="menu-btn" id="menu-btn" aria-label="Menu">' + icon('menu') + '</button>' +
-      '<div class="hdr-title" id="hdr-title">Overview</div>' +
-      '<div class="hdr-search"><span class="icon">' + ICONS.search + '</span><input type="search" class="input" id="hdr-search" placeholder="Search transactions..."></div>' +
       '<div class="spacer"></div>' +
-      '<button class="notif-bell" id="notif-bell" aria-label="Notifications">' + icon('bell') + '<span class="dot" id="notif-dot" style="display:none"></span></button>' +
-      '<div class="dropdown" id="user-menu">' +
-        '<div class="user-chip">' + UI.avatar(this.profile, { id: 'hdr-avatar' }) + '<span class="user-chip-name"><strong style="font-size:13px">' + UI.escapeHtml(name) + '</strong><br><small class="text-muted text-xs">' + UI.escapeHtml(email) + '</small></span></div>' +
-        '<div class="dropdown-menu">' +
-          '<a href="profile.html">' + icon('profile') + ' My Profile</a>' +
-          '<a href="settings.html">' + icon('settings') + ' Settings</a>' +
-          '<div class="dropdown-divider"></div>' +
-          '<button class="danger-item" id="hdr-logout">' + icon('logout') + ' Log Out</button>' +
-        '</div>' +
-      '</div>' +
-      '<div class="notif-panel" id="notif-panel"><div class="np-head">Notifications <a href="notifications.html" class="text-sm">View all</a></div><div id="notif-list" style="min-height:80px"><div class="loading-block"><div class="spinner spinner-sm"></div></div></div><div class="np-foot"><a href="notifications.html" class="text-sm">Open Notification Center</a></div></div>' +
+      '<a href="help.html" class="hdr-help-btn" aria-label="Help">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>' +
+      '</a>' +
       '</header>';
   },
 
@@ -152,86 +134,6 @@ const AppShell = {
     // header logout
     const navLogout = document.getElementById('nav-logout');
     if (navLogout) navLogout.addEventListener('click', function (e) { e.preventDefault(); Auth.logout(); });
-
-    // user menu dropdown
-    const um = document.getElementById('user-menu');
-    if (um) {
-      um.addEventListener('click', function (e) {
-        e.stopPropagation();
-        this.classList.toggle('open');
-      });
-      document.addEventListener('click', function (e) {
-        if (um && !um.contains(e.target)) um.classList.remove('open');
-      });
-    }
-
-    // header logout in dropdown
-    const hdrLogout = document.getElementById('hdr-logout');
-    if (hdrLogout) hdrLogout.addEventListener('click', function () { Auth.logout(); });
-
-    // notifications
-    const bell = document.getElementById('notif-bell');
-    const panel = document.getElementById('notif-panel');
-    if (bell) bell.addEventListener('click', function (e) {
-      e.stopPropagation();
-      panel.classList.toggle('open');
-    });
-    document.addEventListener('click', function (e) {
-      if (panel && !panel.contains(e.target) && e.target !== bell) panel.classList.remove('open');
-    });
-
-    // header search -> transactions page
-    const search = document.getElementById('hdr-search');
-    if (search) search.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' && search.value.trim()) {
-        window.location.href = 'transactions.html?q=' + encodeURIComponent(search.value.trim());
-      }
-    });
   },
 
-  async loadNotifications() {
-    try {
-      const { data, error } = await SB.from('notifications')
-        .select('id,title,message,type,is_read,created_at')
-        .or('user_id.eq.' + Auth.user.id + ',is_global.eq.true')
-        .order('created_at', { ascending: false })
-        .limit(8);
-      if (error) throw error;
-      try {
-        const unread = (await SB.from('notifications')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', Auth.user.id)
-          .eq('is_read', false)).count || 0;
-        this.unread = unread;
-        const dot = document.getElementById('notif-dot');
-        if (dot) dot.style.display = unread > 0 ? 'block' : 'none';
-      } catch (_) { /* unread count failure is non-critical */ }
-
-      const listEl = document.getElementById('notif-list');
-      if (!listEl) return;
-      if (!data || !data.length) {
-        listEl.innerHTML = UI.emptyState('You have no notifications');
-        return;
-      }
-      const icons = { transfer: 'localTransfer', deposit: 'deposits', loan: 'loans', card: 'cards', swap: 'swap', security: 'shield', account: 'wallet', system: 'bell' };
-      listEl.innerHTML = '<div class="notif-list">' + data.map(function (n) {
-        return '<div class="notif-item ' + (n.is_read ? '' : 'unread') + '" data-id="' + n.id + '">' +
-          '<div class="notif-icon">' + icon(icons[n.type] || 'bell') + '</div>' +
-          '<div style="min-width:0;flex:1"><div class="notif-title">' + UI.escapeHtml(n.title) + '</div>' +
-          '<div class="notif-msg">' + UI.escapeHtml(n.message) + '</div>' +
-          '<div class="notif-time">' + UI.timeAgo(n.created_at) + '</div></div></div>';
-      }).join('') + '</div>';
-      listEl.querySelectorAll('.notif-item.unread').forEach(function (item) {
-        item.addEventListener('click', function () {
-          const id = item.getAttribute('data-id');
-          SB.from('notifications').update({ is_read: true }).eq('id', id).then(function () {
-            item.classList.remove('unread');
-          });
-        });
-      });
-    } catch (e) {
-      const listEl = document.getElementById('notif-list');
-      if (listEl) listEl.innerHTML = UI.emptyState('Notifications unavailable');
-    }
-  }
 };

@@ -47,18 +47,19 @@
 }
 
 .dash-user-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-2);
-  margin: 0 0 2px 0;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 4px 0;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
 .dash-greeting-text {
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
   margin: 0;
-  letter-spacing: -0.02em;
 }
 
 .dash-header-right {

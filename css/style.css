@@ -364,8 +364,9 @@ table.table { width: 100%; border-collapse: collapse; font-size: 14px; }
   position: sticky; top: 0; z-index: 1200; background: rgba(255,255,255,.97); border-bottom: 1px solid var(--border); backdrop-filter: blur(8px);
 }
 .site-header .container { display: flex; align-items: center; justify-content: space-between; height: 74px; }
-.brand { display: flex; align-items: center; gap: 12px; }
-.brand img { height: 40px; width: auto; }
+.brand { display: flex; align-items: center; gap: 12px; flex: none; }
+.brand picture { display: block; flex: none; line-height: 0; }
+.brand img { height: 40px; width: auto; flex: none; display: block; }
 .brand-text { font-size: 20px; font-weight: 800; color: var(--primary); letter-spacing: -.01em; }
 .brand-text span { color: var(--gold); }
 .site-nav { display: flex; align-items: center; gap: 26px; }

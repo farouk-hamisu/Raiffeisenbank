@@ -97,7 +97,7 @@ const AppShell = {
       return '<a href="' + it.href + '" class="' + active + '">' + icon(it.icon) + '<span>' + it.label + '</span></a>';
     }).join('');
     return '<aside class="sidebar" id="sidebar">' +
-      '<div class="brand"><img src="' + window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + 'assets/logos/logo.svg" alt="Raiffeisen Bank"></div>' +
+      '<div class="brand"><img src="' + window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + 'assets/logos/logo-light.svg" alt="Raiffeisen Bank"></div>' +
       '<nav class="side-nav">' + items +
       '<div class="nav-label">Account</div>' +
       '<a href="profile.html"><span class="icon">' + ICONS.profile + '</span><span>Profile</span></a>' +

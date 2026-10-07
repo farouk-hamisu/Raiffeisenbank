@@ -328,8 +328,17 @@
 @media (max-width: 560px) {
   .site-header .container { gap: 10px; }
   .brand img { height: 30px; }
-  .site-actions { gap: 6px; }
+  .site-actions { gap: 6px; flex: none; }
   .site-actions .btn { padding: 8px 12px; font-size: 13px; }
+}
+
+@media (max-width: 440px) {
+  .site-header .brand img { height: 36px; }
+}
+
+@media (max-width: 380px) {
+  .site-header .container { gap: 8px; }
+  .site-actions .btn { padding: 7px 10px; font-size: 12.5px; }
 }
 
 /* ---------- CTA band ---------- */

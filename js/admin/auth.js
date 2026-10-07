@@ -102,7 +102,7 @@ function renderAdminShell(title) {
   shell.className = 'app-shell';
   shell.innerHTML =
     '<aside class="sidebar admin-sidebar" id="admin-sidebar">' +
-      '<div class="brand"><img src="../assets/logos/logo.svg" alt="Raiffeisen Bank"></div>' +
+      '<div class="brand"><img src="../assets/logos/logo-light.svg" alt="Raiffeisen Bank"></div>' +
       '<div class="side-nav" style="padding:10px 12px"><div class="nav-label" style="color:#8295b8">Admin Portal</div>' +
         items +
         '<div class="nav-label">Account</div>' +

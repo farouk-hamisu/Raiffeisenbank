@@ -41,6 +41,9 @@
     }).join('') + '</div>';
   }
 
+  // Canvas text is not part of the DOM, so chart labels go through the dictionary directly.
+  function t(s) { return (window.I18N && I18N.t) ? I18N.t(s) : s; }
+
   async function renderCharts() {
     // RLS-safe volume + status data via the admin RPC (direct queries are blocked for admins).
     let chart;
@@ -53,7 +56,7 @@
 
     const months = chart.months || [];
     if (months.length && document.getElementById('vol-chart')) {
-      const labels = months.map(function (m) { return m.month; });
+      const labels = months.map(function (m) { return t(m.month); });
       const credits = months.map(function (m) { return Number(m.credits) || 0; });
       const debits = months.map(function (m) { return Number(m.debits) || 0; });
       Charts.lineChart(document.getElementById('vol-chart'), labels, [
@@ -63,7 +66,7 @@
     }
 
     const counts = chart.status_breakdown || {};
-    const items = Object.keys(counts).map(function (k) { return { label: k, value: counts[k] }; });
+    const items = Object.keys(counts).map(function (k) { return { label: t(k), value: counts[k] }; });
     const canvas = document.getElementById('status-chart');
     if (canvas && items.length) {
       const colors = ['#1a9e5a', '#2f7de1', '#d98e1f', '#d64045', '#7c8aa0', '#123a7e'];

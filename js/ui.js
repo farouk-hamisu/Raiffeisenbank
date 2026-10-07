@@ -429,25 +429,29 @@
 
   // ---------- Formatters ----------
   const currencySymbols = APP_CONFIG.currencySymbols || { USD: '$' };
+  // Active UI locale (js/i18n.js): 'en-US' or 'hu-HU' — dates/numbers follow the language switcher.
+  function i18nLocale() {
+    return (window.I18N && I18N.locale && I18N.locale()) || 'en-US';
+  }
 
   function money(amount, currency) {
     const n = Number(amount) || 0;
     const sym = currencySymbols[currency] || (currency ? currency + ' ' : '') || '$';
-    return sym + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return sym + n.toLocaleString(i18nLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   function formatDate(input) {
     if (!input) return '—';
     const d = new Date(input);
     if (isNaN(d)) return '—';
-    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    return d.toLocaleDateString(i18nLocale(), { year: 'numeric', month: 'short', day: 'numeric' });
   }
 
   function formatDateTime(input) {
     if (!input) return '—';
     const d = new Date(input);
     if (isNaN(d)) return '—';
-    return d.toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleString(i18nLocale(), { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
 
   function timeAgo(input) {

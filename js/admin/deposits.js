@@ -1,4 +1,4 @@
-// marvintlc — Admin deposits module
+// Raiffeisen Bank — Admin deposits module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

@@ -1,4 +1,4 @@
-// marvintlc — Admin customer detail module
+// Raiffeisen Bank — Admin customer detail module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

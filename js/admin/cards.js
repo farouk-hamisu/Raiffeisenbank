@@ -1,4 +1,4 @@
-// marvintlc — Admin cards module
+// Raiffeisen Bank — Admin cards module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

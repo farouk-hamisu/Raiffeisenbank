@@ -1,4 +1,4 @@
-// marvintlc — Admin dashboard module
+// Raiffeisen Bank — Admin dashboard module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

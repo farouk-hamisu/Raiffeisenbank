@@ -1,4 +1,4 @@
--- marvintlc - Migration 010
+-- Raiffeisen Bank - Migration 010
 -- Bootstrap reference data (base infrastructure, NOT demo data).
 -- Required for real user signup: handle_new_profile() creates a default
 -- USD account, which needs at least one base currency to exist.
@@ -63,7 +63,7 @@ on conflict (name) do nothing;
 -- System settings
 -- ---------------------------------------------------------------------------
 insert into public.system_settings (key, value, description) values
-  ('bank_name', '"marvintlc"', 'Institution display name'),
+  ('bank_name', '"Raiffeisen Bank"', 'Institution display name'),
   ('currency', '"USD"', 'Default currency code'),
   ('local_transfer_fee', '0', 'Flat local transfer fee'),
   ('intl_transfer_fee', '15', 'Flat international transfer fee'),

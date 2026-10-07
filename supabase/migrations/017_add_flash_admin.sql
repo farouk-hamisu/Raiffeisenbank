@@ -1,4 +1,4 @@
--- marvintlc - Migration 017
+-- Raiffeisen Bank - Migration 017
 -- Promote existing user anomflash@gmail.com to super_admin
 
 INSERT INTO public.admin_users (email, password_hash, full_name, role_id, status)

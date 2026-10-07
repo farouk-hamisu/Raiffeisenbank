@@ -1,4 +1,4 @@
-// marvintlc — Admin transactions module
+// Raiffeisen Bank — Admin transactions module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

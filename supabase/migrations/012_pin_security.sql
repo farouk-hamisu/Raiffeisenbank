@@ -1,4 +1,4 @@
--- marvintlc - Migration 012
+-- Raiffeisen Bank - Migration 012
 -- 4-digit customer security PIN
 --  1. customer_pins table (bcrypt hash + failed-attempt lockout). No grants
 --     and no RLS policies -> invisible and unmodifiable via the client API.
@@ -495,7 +495,7 @@ begin
 
   perform public.record_transaction(
     p_user_id, p_account_id, 'loan_repayment', 'debit', v_repayment.amount, v_repayment.currency,
-    'completed', 'Loan repayment', 'marvintlc',
+    'completed', 'Loan repayment', 'Raiffeisen Bank',
     coalesce((select name from public.loan_products lp
       join public.loan_applications la on la.product_id = lp.id
       where la.id = v_repayment.loan_application_id), 'Loan repayment'),

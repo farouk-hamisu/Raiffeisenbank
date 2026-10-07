@@ -1,4 +1,4 @@
--- marvintlc - Migration 014
+-- Raiffeisen Bank - Migration 014
 -- Auto-issued cards default to the mastercard brand (dark card face) instead of
 -- visa (blue card face).
 
@@ -59,7 +59,7 @@ begin
       ' was issued to your account.', 'card');
 
     insert into public.notifications (user_id, title, message, type)
-    values (new.id, 'Welcome to marvintlc',
+    values (new.id, 'Welcome to Raiffeisen Bank',
       'Your account has been created. Explore your dashboard to get started.', 'account');
   end if;
 

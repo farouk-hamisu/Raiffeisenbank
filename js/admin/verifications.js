@@ -1,4 +1,4 @@
-// marvintlc — Admin transfer verifications module
+// Raiffeisen Bank — Admin transfer verifications module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

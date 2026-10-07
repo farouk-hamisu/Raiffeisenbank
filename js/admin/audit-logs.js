@@ -1,4 +1,4 @@
-// marvintlc — Admin audit logs module
+// Raiffeisen Bank — Admin audit logs module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

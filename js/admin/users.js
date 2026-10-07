@@ -1,4 +1,4 @@
-// marvintlc — Admin users module
+// Raiffeisen Bank — Admin users module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

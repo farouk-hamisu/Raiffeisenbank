@@ -163,7 +163,7 @@ BEGIN
     PERFORM public.apply_balance_change(v_account.id, v_old.amount, v_old.currency);
     PERFORM public.record_transaction(
       v_user_id, v_account.id, 'loan_disbursement', 'credit', v_old.amount, v_old.currency,
-      'completed', 'Loan disbursement - ' || v_old.reference, 'marvintlc', 'Loan Account', 0, v_old.id);
+      'completed', 'Loan disbursement - ' || v_old.reference, 'Raiffeisen Bank', 'Loan Account', 0, v_old.id);
     PERFORM public.notify_user(v_user_id, 'Loan disbursed',
       'Your loan of ' || to_char(v_old.amount, 'FM9,999,999,990.00') || ' has been disbursed to your account.', 'loan');
 

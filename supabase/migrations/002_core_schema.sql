@@ -1,4 +1,4 @@
--- marvintlc - Migration 002
+-- Raiffeisen Bank - Migration 002
 -- Core database schema
 
 -- ---------------------------------------------------------------------------

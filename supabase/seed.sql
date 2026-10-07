@@ -1,7 +1,7 @@
--- marvintlc - Seed data (development / demo only)
+-- Raiffeisen Bank - Seed data (development / demo only)
 -- NOT for production. Credentials:
---   Customer: demo@marvintlc.com  /  Demo@1234
---   Admin:    admin@marvintlc.com /  Admin@123
+--   Customer: demo@raiffeisenbank.com  /  Demo@1234
+--   Admin:    admin@raiffeisenbank.com /  Admin@123
 
 -- Prevent the profile trigger from auto-creating random accounts during
 -- seeding; accounts are created explicitly below. Re-enabled at the end.
@@ -11,7 +11,7 @@ alter table public.profiles disable trigger on_profile_created;
 DO $$ BEGIN
   insert into public.currencies (code, name, symbol, is_base, enabled) values
     ('USD', 'US Dollar', '$', true, true),
-    ('BTC', 'Bitcoin', '\u20BF', false, true)
+    ('BTC', 'Bitcoin', '₿', false, true)
   on conflict (code) do nothing;
 EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'currencies: skipped'; END $$;
 
@@ -62,14 +62,14 @@ EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'admin_roles: skipped'; END $$;
 
 DO $$ BEGIN
   insert into public.admin_users (email, password_hash, full_name, role_id, status)
-  select 'admin@marvintlc.com', public.admin_hash_password('Admin@123'), 'System Administrator', r.id, 'active'
+  select 'admin@raiffeisenbank.com', public.admin_hash_password('Admin@123'), 'System Administrator', r.id, 'active'
   from public.admin_roles r where r.name = 'super_admin'
   on conflict (email) do nothing;
 EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'admin_users: skipped'; END $$;
 
 DO $$ BEGIN
   insert into public.system_settings (key, value, description) values
-    ('bank_name', '"marvintlc"', 'Institution display name'),
+    ('bank_name', '"Raiffeisen Bank"', 'Institution display name'),
     ('currency', '"USD"', 'Default currency code'),
     ('local_transfer_fee', '0', 'Flat local transfer fee'),
     ('intl_transfer_fee', '15', 'Flat international transfer fee'),
@@ -86,7 +86,7 @@ DO $$ BEGIN
     '00000000-0000-0000-0000-000000000001',
     '00000000-0000-0000-0000-000000000000',
     'authenticated', 'authenticated',
-    'demo@marvintlc.com', public.admin_hash_password('Demo@1234'), now(),
+    'demo@raiffeisenbank.com', public.admin_hash_password('Demo@1234'), now(),
     jsonb_build_object('provider', 'email', 'providers', '["email"]'),
     jsonb_build_object('full_name', 'Alex Morgan'),
     now(), now(), '', '', '', ''
@@ -99,7 +99,7 @@ DO $$ BEGIN
     gen_random_uuid(),
     '00000000-0000-0000-0000-000000000001',
     '00000000-0000-0000-0000-000000000001',
-    jsonb_build_object('sub', '00000000-0000-0000-0000-000000000001', 'email', 'demo@marvintlc.com'),
+    jsonb_build_object('sub', '00000000-0000-0000-0000-000000000001', 'email', 'demo@raiffeisenbank.com'),
     'email', now(), now(), now()
   ) on conflict (provider, provider_id) do nothing;
 EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'auth.identities: skipped'; END $$;
@@ -107,7 +107,7 @@ EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'auth.identities: skipped'; END $$;
 DO $$ BEGIN
   insert into public.profiles (id, email, full_name, phone, avatar_url, address, city, country, status, kyc_status, date_of_birth)
   values (
-    '00000000-0000-0000-0000-000000000001', 'demo@marvintlc.com', 'Alex Morgan',
+    '00000000-0000-0000-0000-000000000001', 'demo@raiffeisenbank.com', 'Alex Morgan',
     '+1 (415) 555-0132', null, '2210 Market Street', 'San Francisco', 'United States', 'active', 'verified', '1991-04-12'
   )
   on conflict (id) do update set
@@ -134,8 +134,8 @@ EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'account_balances: skipped'; END $$;
 
 DO $$ BEGIN
   insert into public.beneficiaries (user_id, name, bank_name, account_number, country, currency, is_international) values
-    ('00000000-0000-0000-0000-000000000001', 'Jordan Blake', 'marvintlc', '4800000000000022', 'United States', 'USD', false),
-    ('00000000-0000-0000-0000-000000000001', 'Sophia Carter', 'marvintlc', '4800000000000023', 'United States', 'USD', false)
+    ('00000000-0000-0000-0000-000000000001', 'Jordan Blake', 'Raiffeisen Bank', '4800000000000022', 'United States', 'USD', false),
+    ('00000000-0000-0000-0000-000000000001', 'Sophia Carter', 'Raiffeisen Bank', '4800000000000023', 'United States', 'USD', false)
   on conflict do nothing;
 EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'beneficiaries: skipped'; END $$;
 
@@ -145,7 +145,7 @@ DO $$ BEGIN
     ('NTB-LT0001',  '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', 'local_transfer', 'debit', 1200.00, 'USD', 0, 'completed', 'Rent payment', 'Alex Morgan', 'Jordan Blake', now() - interval '3 days'),
     ('NTB-BTC001',  '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', 'currency_swap', 'debit', 2000.00, 'USD', 10.00, 'completed', 'USD to BTC swap', 'Alex Morgan', 'USD -> BTC', now() - interval '5 days'),
     ('NTB-CTX0001', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', 'withdrawal', 'debit', 89.50, 'USD', 0, 'completed', 'ATM withdrawal', 'Alex Morgan', 'ATM', now() - interval '6 days'),
-    ('NTB-DEP0002', '00000000-0000-0000-0000-000000000101', '00000000-0000-0000-0000-000000000101', 'deposit', 'credit', 250.00, 'USD', 0, 'completed', 'Cash deposit', 'Cash Deposit', 'Alex Morgan', now() - interval '7 days'),
+    ('NTB-DEP0002', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', 'deposit', 'credit', 250.00, 'USD', 0, 'completed', 'Cash deposit', 'Cash Deposit', 'Alex Morgan', now() - interval '7 days'),
     ('NTB-CTX0002', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', 'withdrawal', 'debit', 154.20, 'USD', 0, 'completed', 'Online purchase', 'Whole Foods Market', 'Alex Morgan', now() - interval '8 days'),
     ('NTB-CTX0003', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', 'withdrawal', 'debit', 320.00, 'USD', 0, 'completed', 'Online purchase', 'Apple Inc.', 'Alex Morgan', now() - interval '10 days'),
     ('NTB-LT0002',  '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', 'local_transfer', 'debit', 450.00, 'USD', 0, 'pending', 'Utilities payment', 'Alex Morgan', 'Pacific Gas & Electric', now() - interval '1 hour')
@@ -154,18 +154,18 @@ EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'transactions: skipped'; END $$;
 
 DO $$ BEGIN
   insert into public.cards (user_id, account_id, card_number, masked_number, card_holder, card_type, card_brand, expiry_month, expiry_year, cvv, spending_limit, status) values
-    ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', '4532015112830366', '4532 \u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 0366', 'Alex Morgan', 'debit', 'visa', 8, 2028, '112', 10000.00, 'active'),
-    ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', '5391182039442218', '5391 \u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 2218', 'Alex Morgan', 'credit', 'mastercard', 3, 2029, '334', 15000.00, 'active'),
-    ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000102', '4716880123456789', '4716 \u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 6789', 'Alex Morgan', 'virtual', 'visa', 12, 2027, '558', 5000.00, 'frozen')
+    ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', '4532015112830366', '4532 •••• •••• 0366', 'Alex Morgan', 'debit', 'visa', 8, 2028, '112', 10000.00, 'active'),
+    ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000101', '5391182039442218', '5391 •••• •••• 2218', 'Alex Morgan', 'credit', 'mastercard', 3, 2029, '334', 15000.00, 'active'),
+    ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000102', '4716880123456789', '4716 •••• •••• 6789', 'Alex Morgan', 'virtual', 'visa', 12, 2027, '558', 5000.00, 'frozen')
   on conflict (card_number) do nothing;
 EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'cards: skipped'; END $$;
 
 DO $$ BEGIN
   insert into public.card_transactions (card_id, user_id, merchant, amount, currency, type, status, created_at) values
-    ('00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000001', 'Whole Foods Market', 154.20, 'USD', 'purchase', 'completed', now() - interval '8 days'),
-    ('00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000001', 'Starbucks', 12.50, 'USD', 'purchase', 'completed', now() - interval '4 days'),
-    ('00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000001', 'Uber', 34.80, 'USD', 'online', 'completed', now() - interval '2 days'),
-    ('00000000-0000-0000-0000-000000000202', '00000000-0000-0000-0000-000000000001', 'Amazon', 89.99, 'USD', 'online', 'completed', now() - interval '5 days');
+    ((select id from public.cards where card_number = '4532015112830366'), '00000000-0000-0000-0000-000000000001', 'Whole Foods Market', 154.20, 'USD', 'purchase', 'completed', now() - interval '8 days'),
+    ((select id from public.cards where card_number = '4532015112830366'), '00000000-0000-0000-0000-000000000001', 'Starbucks', 12.50, 'USD', 'purchase', 'completed', now() - interval '4 days'),
+    ((select id from public.cards where card_number = '4532015112830366'), '00000000-0000-0000-0000-000000000001', 'Uber', 34.80, 'USD', 'online', 'completed', now() - interval '2 days'),
+    ((select id from public.cards where card_number = '4716880123456789'), '00000000-0000-0000-0000-000000000001', 'Amazon', 89.99, 'USD', 'online', 'completed', now() - interval '5 days');
 EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'card_transactions: skipped'; END $$;
 
 DO $$ BEGIN

@@ -1,4 +1,4 @@
--- marvintlc - Migration 001
+-- Raiffeisen Bank - Migration 001
 -- Enable required extensions
 
 create extension if not exists "pgcrypto";

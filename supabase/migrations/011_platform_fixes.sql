@@ -1,4 +1,4 @@
--- marvintlc - Migration 011
+-- Raiffeisen Bank - Migration 011
 -- Platform correctness fixes + feature completion
 --  1. row_to_jsonb() does not exist -> replaced with to_jsonb() in 11 admin functions.
 --  2. admin_create_transaction called record_transaction() missing sender/recipient.
@@ -389,8 +389,8 @@ begin
   select full_name into v_name from public.profiles where id = p_user_id;
   v_tx := public.record_transaction(
     p_user_id, p_account_id, p_type, p_direction, p_amount, p_currency, 'completed', p_description,
-    case when p_direction = 'credit' then 'marvintlc' else coalesce(v_name, 'Customer') end,
-    case when p_direction = 'credit' then coalesce(v_name, 'Customer') else 'marvintlc' end
+    case when p_direction = 'credit' then 'Raiffeisen Bank' else coalesce(v_name, 'Customer') end,
+    case when p_direction = 'credit' then coalesce(v_name, 'Customer') else 'Raiffeisen Bank' end
   );
   if p_direction = 'credit' then
     perform public.apply_balance_change(p_account_id, p_amount, p_currency);

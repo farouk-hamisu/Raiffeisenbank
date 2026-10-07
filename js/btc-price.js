@@ -1,4 +1,4 @@
-// marvintlc — Shared BTC/USD price module
+// Raiffeisen Bank — Shared BTC/USD price module
 // Single authoritative source for BTC price used by bitcoin.js, crypto-withdrawal.js, dashboard.js
 window.BtcPrice = (function () {
   let cached = null;

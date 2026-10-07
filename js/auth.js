@@ -1,4 +1,4 @@
-// marvintlc — Customer authentication (Supabase Auth)
+// Raiffeisen Bank — Customer authentication (Supabase Auth)
 // Handles login/register/forgot/reset/logout, session persistence, protected pages.
 
 const Auth = {

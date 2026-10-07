@@ -1,4 +1,4 @@
-// marvintlc — Admin notifications module
+// Raiffeisen Bank — Admin notifications module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

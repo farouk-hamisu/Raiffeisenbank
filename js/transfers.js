@@ -1,4 +1,4 @@
-// marvintlc — Transfers hub: local, international transfers + crypto withdrawals
+// Raiffeisen Bank — Transfers hub: local, international transfers + crypto withdrawals
 (async function () {
   await AppShell.init({ title: 'Transfers' });
   const user = Auth.user;

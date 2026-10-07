@@ -1,4 +1,4 @@
--- marvintlc - Migration 013
+-- Raiffeisen Bank - Migration 013
 -- Auto-issue a default card for every new account created at signup so the
 -- Cards section is never empty after registration.
 
@@ -65,7 +65,7 @@ begin
       ' was issued to your account.', 'card');
 
     insert into public.notifications (user_id, title, message, type)
-    values (new.id, 'Welcome to marvintlc',
+    values (new.id, 'Welcome to Raiffeisen Bank',
       'Your account has been created. Explore your dashboard to get started.', 'account');
   end if;
 

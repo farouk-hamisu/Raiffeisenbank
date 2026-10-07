@@ -1,4 +1,4 @@
-// marvintlc — Cards module
+// Raiffeisen Bank — Cards module
 (async function () {
   await AppShell.init({ title: 'Cards' });
   const user = Auth.user;

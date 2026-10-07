@@ -1,4 +1,4 @@
-// marvintlc — Settings module
+// Raiffeisen Bank — Settings module
 (async function () {
   const profile = await AppShell.init({ title: 'Settings' });
   if (!profile) return;

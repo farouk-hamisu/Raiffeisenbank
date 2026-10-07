@@ -36,7 +36,14 @@ serve(async (req: Request) => {
       }
       const data = await res.json();
 
-      for (const [quote, rate] of Object.entries(data.rates as Record<string, number>)) {
+      if (!Array.isArray(data)) {
+        throw new Error(`Unexpected Frankfurter response for base=${base}`);
+      }
+
+      for (const row of data as Array<{ quote?: string; rate?: number }>) {
+        const quote = row.quote;
+        const rate = row.rate;
+        if (!quote || typeof rate !== "number") continue;
         // Fee: 0.50% for USD pairs, 1.00% for cross-currency pairs
         const feePercent = base === "USD" || quote === "USD" ? 0.5 : 1.0;
         allRates.push({

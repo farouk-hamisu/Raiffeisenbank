@@ -1,4 +1,4 @@
-// marvintlc — Local transfer module
+// Raiffeisen Bank — Local transfer module
 (async function () {
   await AppShell.init({ title: 'Local Transfer' });
   const user = Auth.user;
@@ -90,11 +90,11 @@
     const benId = document.getElementById('beneficiary-select').value;
     if (benId) {
       const b = state.beneficiaries.find(function (x) { return x.id === benId; });
-      state.recipient = { name: b.name, account: b.account_number, bank: b.bank_name || 'marvintlc', currency: b.currency || 'USD' };
+      state.recipient = { name: b.name, account: b.account_number, bank: b.bank_name || 'Raiffeisen Bank', currency: b.currency || 'USD' };
     } else {
       const name = document.getElementById('r-name').value.trim();
       const account = document.getElementById('r-account').value.trim();
-      const bank = document.getElementById('r-bank').value.trim() || 'marvintlc';
+      const bank = document.getElementById('r-bank').value.trim() || 'Raiffeisen Bank';
       const currency = document.getElementById('r-currency').value;
       if (!name || !account) { err.textContent = 'Enter the recipient name and account number.'; return; }
       if (!/^\d+$/.test(account) || account.length < 6) { err.textContent = 'Enter a valid account number.'; return; }
@@ -113,7 +113,7 @@
   document.getElementById('btn-save-benef').addEventListener('click', async function () {
     const name = document.getElementById('r-name').value.trim();
     const account = document.getElementById('r-account').value.trim();
-    const bank = document.getElementById('r-bank').value.trim() || 'marvintlc';
+    const bank = document.getElementById('r-bank').value.trim() || 'Raiffeisen Bank';
     if (!name || !account) { UI.toast('Enter name and account number.', 'warning'); return; }
     const { error } = await SB.from('beneficiaries').insert({
       user_id: user.id, name: name, account_number: account, bank_name: bank,

@@ -1,4 +1,4 @@
-// marvintlc — Crypto withdrawal module
+// Raiffeisen Bank — Crypto withdrawal module
 (async function () {
   await AppShell.init({ title: 'Crypto Withdrawal' });
   const user = Auth.user;

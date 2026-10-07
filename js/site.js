@@ -1,4 +1,4 @@
-// marvintlc — Public website shell (shared header/footer)
+// Raiffeisen Bank — Public website shell (shared header/footer)
 
 const SITE_NAV = [
   { label: 'Home', href: 'index.html' },
@@ -18,7 +18,7 @@ function renderSiteShell() {
   if (header) {
     header.innerHTML =
       '<div class="container">' +
-        '<a class="brand" href="index.html"><img src="assets/logos/logo.svg" alt="marvintlc"></a>' +
+        '<a class="brand" href="index.html"><img src="assets/logos/logo.svg" alt="Raiffeisen Bank"></a>' +
         '<button class="nav-toggle" id="nav-toggle" aria-label="Menu">' + icon('menu') + '</button>' +
         '<nav class="site-nav" id="site-nav">' +
           SITE_NAV.map(function (n) {
@@ -41,14 +41,14 @@ function renderSiteShell() {
     footer.innerHTML =
       '<div class="container">' +
         '<div class="foot-grid">' +
-          '<div><div class="footer-brand"><a class="brand" href="index.html"><img src="assets/logos/logo.svg" alt="marvintlc"></a></div>' +
+          '<div><div class="footer-brand"><a class="brand" href="index.html"><img src="assets/logos/logo.svg" alt="Raiffeisen Bank"></a></div>' +
           '<p style="margin-top:14px;font-size:14px">A modern digital banking platform built for speed, security and trust. Banking made effortless.</p>' +
           '<p class="text-sm" style="margin-top:10px"><strong>24/7 Support</strong><br>+1 (800) 555-0142</p></div>' +
           '<div><h4>Company</h4><a href="about.html">About Us</a><a href="contact.html">Contact</a><a href="security.html">Security</a><a href="services.html">Services</a></div>' +
           '<div><h4>Products</h4><a href="accounts.html">Accounts</a><a href="cards-info.html">Cards</a><a href="loans-info.html">Loans</a><a href="transfers-info.html">Transfers</a><a href="currency-exchange.html">Currency Exchange</a><a href="mobile-app.html">Mobile App</a><a href="business.html">Business Banking</a></div>' +
           '<div><h4>Online Banking</h4><a href="login.html">Customer Login</a><a href="register.html">Open an Account</a><a href="forgot-password.html">Forgot Password</a><a href="admin/login.html">Admin Portal</a></div>' +
         '</div>' +
-        '<div class="foot-bottom"><span>&copy; ' + new Date().getFullYear() + ' marvintlc. All rights reserved.</span><span>FDIC Insured &middot; Member NCUA &middot; Equal Housing Lender</span></div>' +
+        '<div class="foot-bottom"><span>&copy; ' + new Date().getFullYear() + ' Raiffeisen Bank. All rights reserved.</span><span>FDIC Insured &middot; Member NCUA &middot; Equal Housing Lender</span></div>' +
       '</div>';
   }
 }

@@ -326,7 +326,6 @@ table.table { width: 100%; border-collapse: collapse; font-size: 14px; }
   60%, 100% { transform: translateX(320%); }
 }
 .pl-status { margin: 0; font-size: 13px; font-weight: 600; color: var(--text-2); letter-spacing: .03em; transition: opacity .24s ease; }
-.pl-status.is-swapping { opacity: 0; }
 
 /* ---------- Utilities ---------- */
 .flex { display: flex; align-items: center; gap: 10px; }

@@ -235,15 +235,7 @@
     shown: false,
     _shownAt: 0,
     _hideTimer: null,
-    _msgTimer: null,
-    _msgIdx: 0,
-    messages: [
-      'Preparing your workspace',
-      'Securing your session',
-      'Loading your accounts',
-      'Fetching your balances',
-      'Syncing latest activity'
-    ],
+    text: 'Loading...',
 
     build() {
       if (this.el && this.el.parentNode) return this.el;
@@ -264,7 +256,7 @@
             '<span class="pl-core"></span>' +
           '</div>' +
           '<div class="pl-track"><span class="pl-progress"></span></div>' +
-          '<p class="pl-status" id="pl-status">' + this.messages[0] + '</p>' +
+          '<p class="pl-status" id="pl-status">' + this.text + '</p>' +
         '</div>';
       this.el = div;
       return div;
@@ -278,39 +270,13 @@
       clearTimeout(this._hideTimer);
 
       const status = el.querySelector('#pl-status');
-      if (status) {
-        status.textContent = message || this.messages[0];
-        this._msgIdx = 0;
-      }
-      if (!message) this._startCycle();
+      if (status) status.textContent = message || this.text;
       return el;
-    },
-
-    _startCycle() {
-      clearInterval(this._msgTimer);
-      this._msgTimer = setInterval(() => {
-        const el = this.el;
-        if (!el) return;
-        const status = el.querySelector('#pl-status');
-        if (!status) return;
-        this._msgIdx = (this._msgIdx + 1) % this.messages.length;
-        status.classList.add('is-swapping');
-        setTimeout(() => {
-          status.textContent = this.messages[this._msgIdx];
-          status.classList.remove('is-swapping');
-        }, 240);
-      }, 1800);
-    },
-
-    _stopCycle() {
-      clearInterval(this._msgTimer);
-      this._msgTimer = null;
     },
 
     hide() {
       if (!this.shown) return;
       this.shown = false;
-      this._stopCycle();
       const minWait = Math.max(0, 400 - (Date.now() - this._shownAt));
       this._hideTimer = setTimeout(() => {
         const el = this.el;

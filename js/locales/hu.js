@@ -1731,6 +1731,7 @@ window.LOCALE_HU = Object.assign(window.LOCALE_HU || {}, {
   "Just now": "Épp most",
   "Account created! Welcome to Raiffeisen Bank.": "Számla létrehozva! Üdvözli a Raiffeisen Bank.",
   "Account created. Please check your email to confirm your address.": "Számla létrehozva. Kérjük, erősítse meg e-mail-címét a megadott üzenetben.",
+  "Account created. You can sign in now.": "Számla létrehozva. Most már bejelentkezhet.",
   "Creating account...": "Számla létrehozása...",
   "Enter your email and password.": "Adja meg e-mail-címét és jelszavát.",
   "If that email is registered, a reset link has been sent.": "Ha ez az e-mail-cím regisztrálva van, elküldtük a visszaállító hivatkozást.",

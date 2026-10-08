@@ -435,12 +435,14 @@
   }
 
   function money(amount, currency) {
+    if (global.FX && FX.format) return FX.format(amount, currency);
     const n = Number(amount) || 0;
     const sym = currencySymbols[currency] || (currency ? currency + ' ' : '') || '$';
     return sym + n.toLocaleString(i18nLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   function formatDate(input) {
+    if (global.FX && FX.formatDate) return FX.formatDate(input);
     if (!input) return '—';
     const d = new Date(input);
     if (isNaN(d)) return '—';
@@ -448,6 +450,7 @@
   }
 
   function formatDateTime(input) {
+    if (global.FX && FX.formatDateTime) return FX.formatDateTime(input);
     if (!input) return '—';
     const d = new Date(input);
     if (isNaN(d)) return '—';

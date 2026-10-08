@@ -73,7 +73,7 @@
   function openAccount() {
     const modal = UI.openModal(
       '<div class="field"><label>Account type</label><select class="select" id="a-type"><option value="checking">Checking</option><option value="savings">Savings</option></select></div>' +
-      '<div class="field"><label>Currency</label><select class="select" id="a-currency"><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="NGN">NGN</option><option value="CAD">CAD</option></select></div>' +
+      '<div class="field"><label>Currency</label><select class="select" id="a-currency"><option value="USD">USD</option><option value="HUF">HUF</option></select></div>' +
       '<div class="field"><label>Account number</label><input type="text" class="input" id="a-number" placeholder="Leave blank to auto-generate"></div>' +
       '<div class="form-error" id="a-error"></div>',
       { title: 'Open Account', footer: '<button class="btn btn-outline" data-cancel>Cancel</button><button class="btn btn-primary" data-save>Open Account</button>' }

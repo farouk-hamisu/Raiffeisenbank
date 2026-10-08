@@ -76,7 +76,7 @@
         '</div>' +
         '<div class="balance-meta-row text-muted text-sm">' +
           '<span>1 BTC = ' + fmtCur(btcUsdRate || 0, 'USD') + '</span>' +
-          '<span>USD Balance: ' + fmtCur(usdBalance, 'USD') + '</span>' +
+          '<span data-fx-skip>USD Balance: ' + (window.FX ? FX.formatExact(usdBalance, 'USD') : fmtCur(usdBalance, 'USD')) + '</span>' +
         '</div>' +
       '</div>';
   }

@@ -11,6 +11,10 @@
     return ctx;
   }
 
+  function axisLocale() {
+    return (global.I18N && I18N.locale) ? I18N.locale() : undefined;
+  }
+
   function lineChart(canvas, labels, series, opts) {
     opts = opts || {};
     const ctx = prep(canvas, canvas.clientWidth, canvas.clientHeight);
@@ -32,7 +36,7 @@
     for (let i = 0; i <= steps; i++) {
       const y = pad.t + ih - (ih / steps) * i;
       ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
-      ctx.fillText(Math.round((max / steps) * i).toLocaleString(), 2, y + 4);
+      ctx.fillText(Math.round((max / steps) * i).toLocaleString(axisLocale()), 2, y + 4);
     }
 
     // x labels
@@ -99,7 +103,7 @@
     for (let i = 0; i <= steps; i++) {
       const y = pad.t + ih - (ih / steps) * i;
       ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
-      ctx.fillText(Math.round((max / steps) * i).toLocaleString(), 2, y + 4);
+      ctx.fillText(Math.round((max / steps) * i).toLocaleString(axisLocale()), 2, y + 4);
     }
     values.forEach(function (v, i) {
       const x = pad.l + (iw / n) * i + (iw / n - bw) / 2;

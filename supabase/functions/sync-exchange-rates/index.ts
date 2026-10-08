@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const FRANKFURTER_API = "https://api.frankfurter.dev/v2";
-const CURRENCIES = ["USD", "EUR", "GBP", "NGN", "CAD"];
+const CURRENCIES = ["USD", "HUF"];
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

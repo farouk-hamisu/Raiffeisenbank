@@ -94,7 +94,9 @@
       document.getElementById('r-account').value = b.account_number || '';
       document.getElementById('r-swift').value = b.swift_code || '';
       document.getElementById('r-country').value = b.country || '';
-      document.getElementById('r-currency').value = b.currency || 'EUR';
+      const rCur = document.getElementById('r-currency');
+      rCur.value = b.currency || 'USD';
+      if (!rCur.value) rCur.value = 'USD';
       state.beneficiary = b;
     });
   });

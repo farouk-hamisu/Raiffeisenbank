@@ -104,7 +104,7 @@
     const modal = UI.openModal(
       '<div class="field"><label>Customer email</label><input type="email" class="input" id="c-email" placeholder="customer@example.com"></div>' +
       '<div class="field"><label>Account type</label><select class="select" id="c-type"><option value="checking">Checking</option><option value="savings">Savings</option></select></div>' +
-      '<div class="field"><label>Currency</label><select class="select" id="c-currency"><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="NGN">NGN</option><option value="CAD">CAD</option></select></div>' +
+      '<div class="field"><label>Currency</label><select class="select" id="c-currency"><option value="USD">USD</option><option value="HUF">HUF</option></select></div>' +
       '<div class="field"><label>Account number</label><input type="text" class="input" id="c-number" placeholder="Leave blank to auto-generate"></div>' +
       '<div class="form-error" id="c-error"></div>',
       { title: 'Create Account', footer: '<button class="btn btn-outline" data-cancel>Cancel</button><button class="btn btn-primary" data-save>Create</button>' }

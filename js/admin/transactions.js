@@ -132,7 +132,7 @@
       '<div class="field"><label>Type</label><select class="select" id="t-type">' + TYPES.map(function (t) { return '<option value="' + t + '">' + UI.typeLabel(t) + '</option>'; }).join('') + '</select></div>' +
       '<div class="field"><label>Direction</label><select class="select" id="t-direction"><option value="credit">Credit</option><option value="debit">Debit</option></select></div>' +
       '<div class="field"><label>Amount</label><input type="number" class="input" id="t-amount" min="0.01" step="0.01"></div>' +
-      '<div class="field"><label>Currency</label><select class="select" id="t-currency"><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="NGN">NGN</option><option value="CAD">CAD</option></select></div>' +
+      '<div class="field"><label>Currency</label><select class="select" id="t-currency"><option value="USD">USD</option><option value="HUF">HUF</option></select></div>' +
       '<div class="field"><label>Description</label><input type="text" class="input" id="t-desc"></div>' +
       '<div class="form-error" id="t-error"></div>',
       { title: 'Create Transaction', footer: '<button class="btn btn-outline" data-cancel>Cancel</button><button class="btn btn-primary" data-save>Create</button>' }
@@ -149,7 +149,11 @@
         const user = await adminApi('admin_list_users', { p_search: email, p_limit: 1, p_offset: 0 });
         if (!user.rows.length) { err.textContent = 'No customer found.'; return; }
         const uid = user.rows[0].id;
-        const acc = await adminApi('admin_list_accounts', { p_search: email, p_currency: document.getElementById('t-currency').value, p_limit: 1, p_offset: 0 });
+        const cur = document.getElementById('t-currency').value;
+        let acc = await adminApi('admin_list_accounts', { p_search: email, p_currency: cur, p_limit: 1, p_offset: 0 });
+        if (!acc.rows.length) {
+          acc = await adminApi('admin_list_accounts', { p_search: email, p_limit: 1, p_offset: 0 });
+        }
         if (!acc.rows.length) { err.textContent = 'No matching account found for that currency.'; return; }
         await adminApi('admin_create_transaction', {
           p_user_id: uid, p_account_id: acc.rows[0].id,

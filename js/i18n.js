@@ -13,8 +13,10 @@
 //     inside it are translated piecewise (covers 'You sent ' + amount + ...).
 //   * The language switcher injects itself into the page header when there
 //     is one, otherwise it floats at the bottom-right. Changing language
-//     persists the choice and reloads so that JS-rendered content
-//     (charts, dates, formatted numbers) is regenerated in the new locale.
+//     persists the choice and re-translates the page in place: JS-rendered
+//     content is re-translated from the remembered sources, and the FX layer
+//     (js/fx.js) re-renders dates and monetary values in the currency that
+//     belongs to the language (EN -> USD, HU -> HUF) — no reload needed.
 // ---------------------------------------------------------------
 (function () {
   'use strict';
@@ -48,7 +50,8 @@
     try { localStorage.setItem(STORAGE_KEY, next); } catch (e) {}
     lang = next;
     document.documentElement.lang = next;
-    if (!opts || opts.reload !== false) location.reload();
+    // Live switch by default; pass {reload: true} to force a full reload.
+    if (opts && opts.reload) location.reload();
     else apply();
   }
 
@@ -361,6 +364,9 @@
       translateTextNodes(document.documentElement);
       translateAttributes(document.documentElement);
       ensureSwitcher();
+      // Money/dates: rewrite rendered values for the active display currency
+      // while the observer is still disconnected (single settled write pass).
+      if (window.FX && FX.refresh) FX.refresh();
     } finally {
       applying = false;
       startObserver();

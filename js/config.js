@@ -10,5 +10,8 @@ const APP_CONFIG = {
     BTC: '\u20BF'
   },
   pageSize: 10,
+  // Offline fallback for the USD/HUF display rate (live rates come from the
+  // exchange_rates table via js/fx.js).
+  usdHufRate: 392.5,
   btcPriceApi: 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd'
 };

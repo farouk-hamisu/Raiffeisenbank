@@ -56,9 +56,12 @@
 
     const months = chart.months || [];
     if (months.length && document.getElementById('vol-chart')) {
+      // Amounts are stored in USD; plot them in the active display currency.
+      const cur = (window.FX && FX.displayCurrency) ? FX.displayCurrency() : 'USD';
+      const fx = function (v) { return window.FX ? FX.convert(v, 'USD', cur) : v; };
       const labels = months.map(function (m) { return t(m.month); });
-      const credits = months.map(function (m) { return Number(m.credits) || 0; });
-      const debits = months.map(function (m) { return Number(m.debits) || 0; });
+      const credits = months.map(function (m) { return fx(Number(m.credits) || 0); });
+      const debits = months.map(function (m) { return fx(Number(m.debits) || 0); });
       Charts.lineChart(document.getElementById('vol-chart'), labels, [
         { data: credits, color: '#2f7de1' },
         { data: debits, color: '#1a9e5a' }
@@ -92,6 +95,9 @@
       el.innerHTML = UI.emptyState('Could not load activity');
     }
   }
+
+  // Redraw charts when the display currency changes (language switch / rates).
+  if (window.FX && FX.onRefresh) FX.onRefresh(function () { renderCharts(); });
 
   await load();
   PageLoader.hide();

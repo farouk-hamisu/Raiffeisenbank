@@ -93,7 +93,7 @@
     const acc = state.accounts.find(function (a) { return a.id === accId; });
     const isBtcAccount = acc && acc.currency === 'BTC';
     document.getElementById('w-asset-tag').textContent = asset ? asset.asset : '—';
-    document.getElementById('w-rate').textContent = asset ? '1 ' + asset.asset + ' = $' + Number(asset.rate).toLocaleString(undefined, {maximumFractionDigits: 2}) : '—';
+    document.getElementById('w-rate').textContent = asset ? '1 ' + asset.asset + ' = ' + UI.money(asset.rate, 'USD') : '—';
     document.getElementById('w-fee').textContent = UI.money(state.fee, 'USD');
     if (isBtcAccount) {
       const total = amount + state.fee;

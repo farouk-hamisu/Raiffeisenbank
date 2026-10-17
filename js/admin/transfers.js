@@ -1,4 +1,4 @@
-// Raiffeisen Bank — Admin transfers module
+// Marvin Bank — Admin transfers module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

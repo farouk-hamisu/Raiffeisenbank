@@ -1,5 +1,5 @@
 /* ============================================================
-   Raiffeisen Bank — Core design system (style.css)
+   Marvin Bank — Core design system (style.css)
    Flat, modern, professional financial-services aesthetic.
    ============================================================ */
 
@@ -315,16 +315,6 @@ table.table { width: 100%; border-collapse: collapse; font-size: 14px; }
 }
 @keyframes pl-rotate { to { transform: rotate(360deg); } }
 @keyframes pl-pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(.8); opacity: .75; } }
-.pl-track { width: 200px; height: 5px; border-radius: 999px; background: var(--border); overflow: hidden; }
-.pl-progress {
-  display: block; height: 100%; width: 40%; border-radius: 999px;
-  background: linear-gradient(90deg, var(--primary), var(--accent));
-  animation: pl-slide 1.3s ease-in-out infinite;
-}
-@keyframes pl-slide {
-  0% { transform: translateX(-110%); }
-  60%, 100% { transform: translateX(320%); }
-}
 .pl-status { margin: 0; font-size: 13px; font-weight: 600; color: var(--text-2); letter-spacing: .03em; transition: opacity .24s ease; }
 
 /* ---------- Utilities ---------- */
@@ -756,9 +746,12 @@ table.table { width: 100%; border-collapse: collapse; font-size: 14px; }
 
 /* detail rows */
 .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }
+.detail-grid .span-2 { grid-column: 1 / -1; }
 .detail-item .k { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 2px; }
 .detail-item .v { font-size: 14px; font-weight: 600; }
-@media (max-width: 640px) { .detail-grid { grid-template-columns: 1fr; } }
+.detail-item .v.amount-credit { color: var(--success); }
+.detail-item .v.amount-debit { color: var(--danger); }
+@media (max-width: 640px) { .detail-grid { grid-template-columns: 1fr; } .detail-grid .span-2 { grid-column: 1 / -1; } }
 
 /* step indicator for flows */
 .step-flow { display: flex; align-items: center; gap: 8px; margin-bottom: 26px; flex-wrap: wrap; }

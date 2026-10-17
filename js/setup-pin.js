@@ -1,4 +1,4 @@
-// Raiffeisen Bank — Security PIN setup / change for existing accounts.
+// Marvin Bank — Security PIN setup / change for existing accounts.
 (function () {
   'use strict';
 

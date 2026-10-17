@@ -1,4 +1,4 @@
-// Raiffeisen Bank — Admin currencies & exchange rates module
+// Marvin Bank — Admin currencies & exchange rates module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

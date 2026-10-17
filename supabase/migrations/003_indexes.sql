@@ -1,4 +1,4 @@
--- Raiffeisen Bank - Migration 003
+-- Marvin Bank - Migration 003
 -- Indexes for frequently queried fields
 
 create index if not exists idx_profiles_email      on public.profiles (email);

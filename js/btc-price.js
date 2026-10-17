@@ -1,4 +1,4 @@
-// Raiffeisen Bank — Shared BTC/USD price module
+// Marvin Bank — Shared BTC/USD price module
 // Single authoritative source for BTC price used by bitcoin.js, crypto-withdrawal.js, dashboard.js
 window.BtcPrice = (function () {
   let cached = null;
@@ -9,7 +9,7 @@ window.BtcPrice = (function () {
     const now = Date.now();
     if (cached && (now - cacheTime) < CACHE_TTL) return cached;
 
-    const cfg = window.APP_CONFIG || {};
+    const cfg = (typeof APP_CONFIG !== 'undefined') ? APP_CONFIG : (window.APP_CONFIG || {});
     const api = cfg.btcPriceApi || 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd';
 
     try {

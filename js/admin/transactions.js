@@ -1,4 +1,4 @@
-// Raiffeisen Bank — Admin transactions module
+// Marvin Bank — Admin transactions module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;
@@ -40,11 +40,13 @@
     el.innerHTML = '<table class="table mobile-cards">' +
       '<thead><tr><th>Reference</th><th>User</th><th>Type</th><th>Direction</th><th>Amount</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>' +
       rows.map(function (t) {
-        return '<tr><td data-label="Reference"><span class="cell-main">' + UI.escapeHtml(t.reference) + '</span></td>' +
+        const credit = t.direction === 'credit';
+        return '<tr><td data-label="Reference"><span class="cell-main mono">' + UI.escapeHtml(t.reference) + '</span>' +
+            (t.description ? '<div class="cell-sub">' + UI.escapeHtml(t.description) + '</div>' : '') + '</td>' +
           '<td data-label="User">' + UI.escapeHtml(t.user_email || t.user_name || '—') + '</td>' +
           '<td data-label="Type">' + UI.typeLabel(t.type) + '</td>' +
-          '<td data-label="Direction">' + UI.escapeHtml(t.direction) + '</td>' +
-          '<td data-label="Amount" class="' + (t.direction === 'credit' ? 'amount-credit' : 'amount-debit') + '">' + UI.money(t.amount, t.currency) + '</td>' +
+          '<td data-label="Direction">' + (credit ? 'Credit' : 'Debit') + '</td>' +
+          '<td data-label="Amount" class="' + (credit ? 'amount-credit' : 'amount-debit') + '">' + (credit ? '+' : '−') + UI.money(t.amount, t.currency) + '</td>' +
           '<td data-label="Status">' + UI.badge(t.status) + '</td>' +
           '<td data-label="Date">' + UI.formatDateTime(t.created_at) + '</td>' +
           '<td data-label="Actions"><div class="row-actions">' +
@@ -59,18 +61,20 @@
     el.querySelectorAll('[data-view]').forEach(function (b) {
       b.addEventListener('click', function () {
         const t = rows.find(function (x) { return x.id === b.getAttribute('data-view'); });
+        const credit = t.direction === 'credit';
         UI.openModal(
           '<div class="detail-grid">' +
-            '<div class="detail-item"><div class="k">Reference</div><div class="v">' + UI.escapeHtml(t.reference) + '</div></div>' +
+            '<div class="detail-item"><div class="k">Reference</div><div class="v mono">' + UI.escapeHtml(t.reference) + '</div></div>' +
             '<div class="detail-item"><div class="k">Status</div><div class="v">' + UI.badge(t.status) + '</div></div>' +
             '<div class="detail-item"><div class="k">User</div><div class="v">' + UI.escapeHtml(t.user_email || '—') + '</div></div>' +
             '<div class="detail-item"><div class="k">Type</div><div class="v">' + UI.typeLabel(t.type) + '</div></div>' +
-            '<div class="detail-item"><div class="k">Amount</div><div class="v">' + UI.money(t.amount, t.currency) + '</div></div>' +
+            '<div class="detail-item"><div class="k">Direction</div><div class="v">' + (credit ? 'Credit' : 'Debit') + '</div></div>' +
+            '<div class="detail-item"><div class="k">Amount</div><div class="v ' + (credit ? 'amount-credit' : 'amount-debit') + '">' + (credit ? '+' : '−') + UI.money(t.amount, t.currency) + '</div></div>' +
             '<div class="detail-item"><div class="k">Fee</div><div class="v">' + UI.money(t.fee || 0, t.currency) + '</div></div>' +
+            '<div class="detail-item"><div class="k">Created</div><div class="v">' + UI.formatDateTime(t.created_at) + '</div></div>' +
             '<div class="detail-item"><div class="k">Sender</div><div class="v">' + UI.escapeHtml(t.sender || '—') + '</div></div>' +
             '<div class="detail-item"><div class="k">Recipient</div><div class="v">' + UI.escapeHtml(t.recipient || '—') + '</div></div>' +
-            '<div class="detail-item"><div class="k">Description</div><div class="v">' + UI.escapeHtml(t.description || '—') + '</div></div>' +
-            '<div class="detail-item"><div class="k">Created</div><div class="v">' + UI.formatDateTime(t.created_at) + '</div></div>' +
+            '<div class="detail-item span-2"><div class="k">Description</div><div class="v">' + UI.escapeHtml(t.description || '—') + '</div></div>' +
           '</div>',
           { title: 'Transaction Details' }
         );

@@ -93,8 +93,8 @@ begin
 
   v_tx := public.record_transaction(
     p_user_id, p_account_id, p_type, p_direction, p_amount, upper(p_currency), 'completed', p_description,
-    case when p_direction = 'credit' then 'Raiffeisen Bank' else coalesce(v_name, 'Customer') end,
-    case when p_direction = 'credit' then coalesce(v_name, 'Customer') else 'Raiffeisen Bank' end
+    case when p_direction = 'credit' then 'Marvin Bank' else coalesce(v_name, 'Customer') end,
+    case when p_direction = 'credit' then coalesce(v_name, 'Customer') else 'Marvin Bank' end
   );
 
   if p_direction = 'credit' then

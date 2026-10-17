@@ -1,4 +1,4 @@
-// Raiffeisen Bank — Admin loans module
+// Marvin Bank — Admin loans module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

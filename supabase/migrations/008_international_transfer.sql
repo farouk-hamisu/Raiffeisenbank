@@ -1,4 +1,4 @@
--- Raiffeisen Bank - Migration 008
+-- Marvin Bank - Migration 008
 -- Additional customer-facing financial functions
 
 -- ---------------------------------------------------------------------------

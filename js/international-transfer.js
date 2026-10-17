@@ -1,4 +1,4 @@
-// Raiffeisen Bank — International transfer module
+// Marvin Bank — International transfer module
 (async function () {
   await AppShell.init({ title: 'International Transfer' });
   const user = Auth.user;

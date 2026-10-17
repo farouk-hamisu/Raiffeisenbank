@@ -1,4 +1,4 @@
--- Raiffeisen Bank - Migration 002
+-- Marvin Bank - Migration 002
 -- Core database schema
 
 -- ---------------------------------------------------------------------------

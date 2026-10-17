@@ -1,19 +1,30 @@
-// Raiffeisen Bank — multicurrency display layer (USD / HUF)
+// Marvin Bank — multicurrency display layer
 // ---------------------------------------------------------------
-// The UI language picks the display currency: English -> USD, Hungarian -> HUF.
+// The display currency is the user's admin-managed preferred currency
+// (profiles.preferred_currency) when one is set; otherwise the UI
+// language picks it: English -> USD, Hungarian -> HUF.
 // UI.money/formatDate/formatDateTime register every rendered string here, and
 // FX.refresh() rewrites text nodes (plus translated attributes) whenever the
-// language or the exchange rates change — a language switch therefore updates
-// all monetary values live, without a page reload.
+// language, preferred currency or the exchange rates change — a switch
+// therefore updates all monetary values live, without a page reload.
+// Conversion is display-only: stored amounts and ledger records never change.
 //
 // Rates come from the public exchange_rates table (cached in localStorage);
-// APP_CONFIG.usdHufRate is the offline fallback. Non-fiat codes (BTC ...) are
-// rendered as quantities and never converted.
+// APP_CONFIG.usdHufRate is the offline USD/HUF fallback. Non-fiat codes
+// (BTC ...) are rendered as quantities and never converted.
 (function (global) {
   'use strict';
 
-  var FIAT = { USD: 1, HUF: 1 };
-  var PAIRS = ['USD', 'HUF'];
+  // Display-convertible fiat currencies supported by the platform.
+  var FIAT = { USD: 1, HUF: 1, EUR: 1, GBP: 1, NGN: 1, CAD: 1 };
+  var DISP_FIATS = [
+    { code: 'USD', name: 'US Dollar', symbol: '$' },
+    { code: 'HUF', name: 'Hungarian Forint', symbol: 'Ft' },
+    { code: 'EUR', name: 'Euro', symbol: '\u20AC' },
+    { code: 'GBP', name: 'British Pound', symbol: '\u00A3' },
+    { code: 'NGN', name: 'Nigerian Naira', symbol: '\u20A6' },
+    { code: 'CAD', name: 'Canadian Dollar', symbol: 'CA$' }
+  ];
   var RATE_CACHE_KEY = 'rb_rates_v1';
   var MAX_REGISTRY = 800;
   var MAX_ALTERNATION = 600;
@@ -27,17 +38,25 @@
   // "450.00 USD" / "500 USD" — but never the "1 USD = BTC" style rate labels
   var RE_USD_CODE = /([+-]?)(\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?|\d+(?:\.\d{1,2})?)\s?USD\b(?!\s*=\s*)/g;
   // "486 700 Ft" / "1 234,56 HUF" (Hungarian grouping)
-  var RE_HUF = /([+-]?)(\d{1,3}(?:[ \u00A0\u202F]\d{3})+(?:[,.]\d{1,2})?|\d+(?:[,.]\d{1,2})?)\s?(?:Ft|HUF)\b/g;
+  var RE_HUF = /([+-]?)(\d{1,3}(?:[   ]\d{3})+(?:[,.]\d{1,2})?|\d+(?:[,.]\d{1,2})?)\s?(?:Ft|HUF)\b/g;
 
   var rates = Object.create(null);   // 'USDHUF' -> rate
+  var preferred = null;              // admin-set display currency override
   var registry = new Map();          // rendered string -> {t:1 money|2 date|3 datetime, ...}
   var regVersion = 0;
   var regCache = { v: -1, re: null };
   var listeners = [];
   var lastKey = null;
 
+  // APP_CONFIG is declared with `const` in js/config.js, so it is a lexical
+  // global but NOT a window property — read it via a bare identifier.
+  function appConfig() {
+    if (typeof APP_CONFIG !== 'undefined') return APP_CONFIG;
+    return global.APP_CONFIG || {};
+  }
+
   // ---------------------------------------------------------------- rates
-  var fallback = (global.APP_CONFIG && Number(APP_CONFIG.usdHufRate)) || 392.5;
+  var fallback = Number(appConfig().usdHufRate) || 392.5;
   rates.USDHUF = fallback;
   rates.HUFUSD = 1 / fallback;
 
@@ -46,13 +65,12 @@
   }
 
   function normalize() {
-    PAIRS.forEach(function (a) {
-      PAIRS.forEach(function (b) {
-        if (a === b) return;
-        var fwd = rates[a + b], rev = rates[b + a];
-        if (fwd > 0 && !(rev > 0)) rates[b + a] = 1 / fwd;
-        else if (rev > 0 && !(fwd > 0)) rates[a + b] = 1 / rev;
-      });
+    Object.keys(rates).forEach(function (k) {
+      if (k.length !== 6) return; // 'USDEUR' style pair keys only
+      var fwd = rates[k];
+      if (!(fwd > 0)) return;
+      var a = k.slice(0, 3), b = k.slice(3);
+      if (!(rates[b + a] > 0)) rates[b + a] = 1 / fwd;
     });
   }
 
@@ -69,7 +87,7 @@
   }
 
   function loadRates() {
-    var cfg = global.APP_CONFIG || {};
+    var cfg = appConfig();
     if (!cfg.supabaseUrl || !cfg.supabaseAnonKey || !global.fetch) return Promise.resolve(null);
     return fetch(cfg.supabaseUrl + '/rest/v1/exchange_rates?select=base_currency,quote_currency,rate', {
       headers: { apikey: cfg.supabaseAnonKey, Authorization: 'Bearer ' + cfg.supabaseAnonKey }
@@ -91,7 +109,10 @@
       var changed = applyRateMap(map);
       if (changed) refresh();
       return map;
-    }).catch(function () { return null; });
+    }).catch(function (e) {
+      if (global.console && console.error) console.error('FX.loadRates failed', e);
+      return null;
+    });
   }
 
   try {
@@ -106,7 +127,24 @@
     return l === 'hu' ? 'hu' : 'en';
   }
 
-  function displayCurrency() { return langCode() === 'hu' ? 'HUF' : 'USD'; }
+  function displayCurrency() {
+    if (preferred && FIAT[preferred]) return preferred;
+    return langCode() === 'hu' ? 'HUF' : 'USD';
+  }
+
+  // Admin-managed per-user override (profiles.preferred_currency). Null/empty
+  // or an unknown code falls back to the language default.
+  function setPreferredCurrency(code) {
+    code = String(code || '').toUpperCase();
+    if (!code || !FIAT[code]) code = null;
+    if (code === preferred) return false;
+    preferred = code;
+    if (global.FX && document.body) refresh();
+    return true;
+  }
+
+  function fiats() { return DISP_FIATS.slice(); }
+
   function locale() { return langCode() === 'hu' ? 'hu-HU' : 'en-US'; }
   function isFiat(code) { return !!FIAT[String(code || '').toUpperCase()]; }
 
@@ -136,15 +174,18 @@
   function formatMoney(value, code) {
     var n = Number(value) || 0;
     code = String(code || 'USD').toUpperCase();
-    if (code === 'USD' || code === 'HUF') {
+    if (isFiat(code)) {
+      // Stable per-currency formatting: HUF keeps Hungarian style (0 decimals,
+      // "Ft"), USD keeps US style; other fiats follow the UI language locale.
+      var fmtLocale = code === 'HUF' ? 'hu-HU' : (code === 'USD' ? 'en-US' : locale());
       try {
-        return new Intl.NumberFormat(code === 'HUF' ? 'hu-HU' : 'en-US', {
+        return new Intl.NumberFormat(fmtLocale, {
           style: 'currency', currency: code,
           minimumFractionDigits: decimals(code), maximumFractionDigits: decimals(code)
         }).format(n);
       } catch (e) {}
     }
-    var sym = (global.APP_CONFIG && APP_CONFIG.currencySymbols && APP_CONFIG.currencySymbols[code]) || '';
+    var sym = (appConfig().currencySymbols && appConfig().currencySymbols[code]) || '';
     var num;
     try {
       num = new Intl.NumberFormat(locale(), { minimumFractionDigits: 2, maximumFractionDigits: 8 }).format(n);
@@ -198,6 +239,7 @@
     }
     if (entry.t === 2) return formatDate(entry.i);
     if (entry.t === 3) return formatDateTime(entry.i);
+    if (entry.t === 4) return formatTime(entry.i);
     return null;
   }
 
@@ -250,6 +292,20 @@
     return text;
   }
 
+  function formatTime(input) {
+    if (!input) return '\u2014';
+    var d = new Date(input);
+    if (isNaN(d)) return '\u2014';
+    var text;
+    try {
+      text = d.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+      text = d.toLocaleTimeString();
+    }
+    register(text, { t: 4, i: input });
+    return text;
+  }
+
   // ------------------------------------------------------- text conversion
   function parseUsd(s) {
     var n = parseFloat(String(s).replace(/,/g, ''));
@@ -269,29 +325,26 @@
     if (text.indexOf('$') === -1 && !/Ft|HUF|USD/.test(text)) return text;
     var out = text;
     var target = displayCurrency();
-    if (target === 'HUF') {
-      out = out.replace(RE_USD_SYM, function (m, sign, num) {
-        var v = parseUsd(num);
-        if (v == null) return m;
-        if (sign === '-') v = -v;
-        var s = formatMoney(convert(v, 'USD', 'HUF'), 'HUF');
-        return sign === '+' && v > 0 ? '+' + s : s;
-      });
-      out = out.replace(RE_USD_CODE, function (m, sign, num) {
-        var v = parseUsd(num);
-        if (v == null) return m;
-        if (sign === '-') v = -v;
-        var s = formatMoney(convert(v, 'USD', 'HUF'), 'HUF');
-        return sign === '+' && v > 0 ? '+' + s : s;
-      });
-    } else {
-      out = out.replace(RE_HUF, function (m, sign, num) {
-        var v = parseHuf(num);
-        if (v == null) return m;
-        if (sign === '-') v = -v;
-        var s = formatMoney(convert(v, 'HUF', 'USD'), 'USD');
-        return sign === '+' && v > 0 ? '+' + s : s;
-      });
+    function usdReplace(m, sign, num) {
+      var v = parseUsd(num);
+      if (v == null) return m;
+      if (sign === '-') v = -v;
+      var s = formatMoney(convert(v, 'USD', target), target);
+      return sign === '+' && v > 0 ? '+' + s : s;
+    }
+    function hufReplace(m, sign, num) {
+      var v = parseHuf(num);
+      if (v == null) return m;
+      if (sign === '-') v = -v;
+      var s = formatMoney(convert(v, 'HUF', target), target);
+      return sign === '+' && v > 0 ? '+' + s : s;
+    }
+    if (target !== 'USD') {
+      out = out.replace(RE_USD_SYM, usdReplace);
+      out = out.replace(RE_USD_CODE, usdReplace);
+    }
+    if (target !== 'HUF') {
+      out = out.replace(RE_HUF, hufReplace);
     }
     return out;
   }
@@ -325,6 +378,11 @@
     return false;
   }
 
+  // Original (pre-conversion) strings, so a display-currency change can
+  // re-convert from the source instead of leaving stale converted text.
+  var srcNodes = new WeakMap();  // text node -> original string
+  var srcAttrs = new WeakMap();  // element  -> { attr: original value }
+
   function refresh() {
     if (!document.body) return;
     var walker = document.createTreeWalker(document.documentElement, NodeFilter.SHOW_TEXT, {
@@ -340,20 +398,35 @@
     });
     var node;
     while ((node = walker.nextNode())) {
-      var next = convertText(node.nodeValue);
-      if (next !== node.nodeValue) node.nodeValue = next;
+      var cur = node.nodeValue;
+      var src = srcNodes.get(node);
+      // First sighting, or the node was rewritten externally (e.g. by the
+      // i18n translator) — rebase the conversion source on the current text.
+      if (src === undefined || node.fxLast !== cur) {
+        src = cur;
+        if (convertText(src) !== src) srcNodes.set(node, src);
+        else srcNodes.delete(node);
+      }
+      var next = convertText(src);
+      node.fxLast = next;
+      if (next !== cur) node.nodeValue = next;
     }
 
     var els = document.body.querySelectorAll('*');
     for (var i = 0; i < els.length; i++) {
       var el = els[i];
       if (shouldSkip(el)) continue;
+      var saved = srcAttrs.get(el);
       for (var a = 0; a < ATTRS.length; a++) {
         var name = ATTRS[a];
         if (!el.hasAttribute(name)) continue;
         var val = el.getAttribute(name);
         if (!val) continue;
-        var nv = convertText(val);
+        if (!saved) { saved = {}; srcAttrs.set(el, saved); }
+        var last = el.fxLastAttrs || (el.fxLastAttrs = {});
+        if (saved[name] === undefined || last[name] !== val) saved[name] = val;
+        var nv = convertText(saved[name]);
+        last[name] = nv;
         if (nv !== val) el.setAttribute(name, nv);
       }
     }
@@ -386,6 +459,8 @@
 
   global.FX = {
     displayCurrency: displayCurrency,
+    setPreferredCurrency: setPreferredCurrency,
+    fiats: fiats,
     locale: locale,
     isFiat: isFiat,
     rate: getRate,
@@ -394,6 +469,7 @@
     formatExact: formatExact,
     formatDate: formatDate,
     formatDateTime: formatDateTime,
+    formatTime: formatTime,
     convertText: convertText,
     refresh: refresh,
     onRefresh: onRefresh,

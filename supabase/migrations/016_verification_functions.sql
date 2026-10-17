@@ -1,4 +1,4 @@
--- Raiffeisen Bank - Migration 016
+-- Marvin Bank - Migration 016
 -- RPCs for the admin-controlled verification workflow: transfer creation,
 -- code generation/verification, admin review, and outgoing-transfer controls.
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Open an Account — Raiffeisen Bank</title>
+  <title>Open an Account — Marvin Bank</title>
   <link rel="icon" type="image/svg+xml" href="assets/logos/favicon.svg">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/marketing.css">
@@ -28,7 +28,7 @@
     <div class="mk-auth-panel">
       <div class="mk-auth-card" style="max-width:500px">
         <div class="mk-auth-brand">
-          <img src="assets/logos/logo.svg" alt="Raiffeisen Bank">
+          <img src="assets/logos/logo.svg" alt="Marvin Bank">
         </div>
         <h1>Open your account</h1>
         <p class="mk-auth-sub">It takes less than two minutes to get started</p>
@@ -124,7 +124,7 @@
         try {
           const res = await Auth.signUp(fullName, email, password, pin);
           if (res.session) {
-            UI.toast('Account created! Welcome to Raiffeisen Bank.', 'success');
+            UI.toast('Account created! Welcome to Marvin Bank.', 'success');
             window.location.href = 'dashboard.html';
           } else {
             UI.toast('Account created. You can sign in now.', 'success');

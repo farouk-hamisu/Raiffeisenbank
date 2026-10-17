@@ -1,4 +1,4 @@
-// Raiffeisen Bank — Bitcoin balance and USD/BTC swap
+// Marvin Bank — Bitcoin balance and USD/BTC swap
 (async function () {
   await AppShell.init({ title: 'Bitcoin' });
   const user = Auth.user;

@@ -1,4 +1,4 @@
-// Raiffeisen Bank — UI helpers (toast, modal, formatters, badges, loading)
+// Marvin Bank — UI helpers (toast, modal, formatters, badges, loading)
 (function (global) {
   'use strict';
 
@@ -235,7 +235,6 @@
     shown: false,
     _shownAt: 0,
     _hideTimer: null,
-    text: 'Loading...',
 
     build() {
       if (this.el && this.el.parentNode) return this.el;
@@ -255,22 +254,17 @@
             '<span class="pl-ring pl-ring--3"></span>' +
             '<span class="pl-core"></span>' +
           '</div>' +
-          '<div class="pl-track"><span class="pl-progress"></span></div>' +
-          '<p class="pl-status" id="pl-status">' + this.text + '</p>' +
         '</div>';
       this.el = div;
       return div;
     },
 
-    show(message) {
+    show() {
       const el = this.build();
       if (!el.parentNode) document.body.appendChild(el);
       this.shown = true;
       this._shownAt = Date.now();
       clearTimeout(this._hideTimer);
-
-      const status = el.querySelector('#pl-status');
-      if (status) status.textContent = message || this.text;
       return el;
     },
 
@@ -361,7 +355,7 @@
     const faceClass = 'card-face card-face--' + brand + (frozen ? ' is-frozen' : '');
     return '<div class="' + faceClass + '" data-cvv="' + cvv + '">' +
       '<div class="cf-top">' +
-        '<span class="cf-issuer">Raiffeisen Bank</span>' +
+        '<span class="cf-issuer">Marvin Bank</span>' +
         '<button class="cf-eye" type="button" aria-label="Show card number and CVV">' +
           ICONS.eye + ICONS.eyeOff +
         '</button>' +
@@ -421,6 +415,14 @@
     const d = new Date(input);
     if (isNaN(d)) return '—';
     return d.toLocaleString(i18nLocale(), { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+
+  function formatTime(input) {
+    if (global.FX && FX.formatTime) return FX.formatTime(input);
+    if (!input) return '—';
+    const d = new Date(input);
+    if (isNaN(d)) return '—';
+    return d.toLocaleTimeString(i18nLocale(), { hour: '2-digit', minute: '2-digit' });
   }
 
   function timeAgo(input) {
@@ -529,6 +531,7 @@
       LOAN_NOT_FOUND: 'Loan application not found.',
       PRODUCT_NOT_FOUND: 'Loan product not found.',
       CURRENCY_NOT_FOUND: 'Currency not found.',
+      CURRENCY_NOT_SUPPORTED: 'This currency is not available for display.',
       CURRENCY_IN_USE: 'Currency cannot be deleted because it is in use.',
       PRODUCT_IN_USE: 'Loan product cannot be deleted because it has applications.',
       REPAYMENT_NOT_FOUND: 'Repayment record not found.',
@@ -947,7 +950,7 @@
 
   global.UI = {
     toast, openModal, closeModal, confirmDialog, loading,
-    money, formatDate, formatDateTime, timeAgo, initial, avatar,
+    money, formatDate, formatDateTime, formatTime, timeAgo, initial, avatar,
     badge, typeLabel, escapeHtml, emptyState, friendlyError, apiErrorMessage,
     rpc, qs, copyText, formatNumber: money,
     cardDigits, renderCardFace,

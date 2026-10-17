@@ -1,4 +1,4 @@
-// Raiffeisen Bank — Supabase client bootstrap
+// Marvin Bank — Supabase client bootstrap
 // Assumes the Supabase JS client is loaded globally (see <script> tags in HTML).
 
 function createSupabaseClient() {

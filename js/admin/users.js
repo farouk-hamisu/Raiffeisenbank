@@ -1,4 +1,4 @@
-// Raiffeisen Bank — Admin users module
+// Marvin Bank — Admin users module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;
@@ -7,6 +7,27 @@
   const PAGE = 12;
   let page = 1;
   let total = 0;
+
+  // Display-currency <option> list (matches js/fx.js supported fiats).
+  function currencyOptions(selected) {
+    const fiats = (window.FX && FX.fiats) ? FX.fiats() : [{ code: 'USD', name: 'US Dollar' }];
+    let opts = '<option value="">Language default</option>';
+    fiats.forEach(function (f) {
+      opts += '<option value="' + f.code + '"' + (selected === f.code ? ' selected' : '') + '>' +
+        f.code + ' \u2014 ' + f.name + '</option>';
+    });
+    return opts;
+  }
+
+  // Renders a user's total in their preferred currency (display-only),
+  // falling back to the admin's own display currency when unset/unavailable.
+  function userMoney(u, v) {
+    const pc = u.preferred_currency;
+    if (pc && window.FX && FX.rate && (pc === 'USD' || FX.rate('USD', pc))) {
+      return FX.formatExact(FX.convert(v, 'USD', pc), pc);
+    }
+    return UI.money(v, 'USD');
+  }
 
   async function load() {
     const el = document.getElementById('users-table');
@@ -38,7 +59,11 @@
           '<td data-label="Status">' + UI.badge(u.status) + '</td>' +
           '<td data-label="KYC">' + UI.badge(u.kyc_status) + '</td>' +
           '<td data-label="Accounts">' + u.account_count + '</td>' +
-          '<td data-label="Total balance">' + UI.money(u.total_balance, 'USD') + '</td>' +
+          // data-fx-skip: this figure is deliberately shown in the CUSTOMER's
+          // preferred currency, so the admin's own display currency must not
+          // re-convert it.
+          '<td data-label="Total balance" data-fx-skip><div>' + userMoney(u, u.total_balance) + '</div>' +
+            (u.preferred_currency ? '<div class="cell-sub">in ' + UI.escapeHtml(u.preferred_currency) + '</div>' : '') + '</td>' +
           '<td data-label="Transfers"><button class="btn btn-sm ' + (transfersEnabled ? 'btn-success' : 'btn-failed') + '" data-toggle-transfers="' + u.id + '" data-enabled="' + transfersEnabled + '">' + (transfersEnabled ? 'Enabled' : 'Disabled') + '</button></td>' +
           '<td data-label="Joined">' + UI.formatDate(u.created_at) + '</td>' +
           '<td data-label="Actions"><div class="row-actions">' +
@@ -152,6 +177,7 @@
         '<div class="field"><label>Phone</label><input type="text" class="input" id="u-phone" value="' + UI.escapeHtml(u.phone || '') + '"></div>' +
         '<div class="field"><label>Status</label><select class="select" id="u-status"><option value="active"' + (u.status === 'active' ? ' selected' : '') + '>Active</option><option value="pending"' + (u.status === 'pending' ? ' selected' : '') + '>Pending</option><option value="suspended"' + (u.status === 'suspended' ? ' selected' : '') + '>Suspended</option><option value="closed"' + (u.status === 'closed' ? ' selected' : '') + '>Closed</option></select></div>' +
         '<div class="field"><label>KYC status</label><select class="select" id="u-kyc"><option value="pending"' + (u.kyc_status === 'pending' ? ' selected' : '') + '>Pending</option><option value="verified"' + (u.kyc_status === 'verified' ? ' selected' : '') + '>Verified</option><option value="rejected"' + (u.kyc_status === 'rejected' ? ' selected' : '') + '>Rejected</option></select></div>' +
+        '<div class="field"><label>Preferred currency</label><select class="select" id="u-currency">' + currencyOptions(u.preferred_currency) + '</select></div>' +
         '<div class="field"><label>Address</label><input type="text" class="input" id="u-address" value="' + UI.escapeHtml(u.address || '') + '"></div>' +
         '<div class="field"><label>City</label><input type="text" class="input" id="u-city" value="' + UI.escapeHtml(u.city || '') + '"></div>' +
         '<div class="field"><label>Country</label><input type="text" class="input" id="u-country" value="' + UI.escapeHtml(u.country || '') + '"></div>' +
@@ -175,6 +201,10 @@
           p_city: document.getElementById('u-city').value.trim() || null,
           p_country: document.getElementById('u-country').value.trim() || null
         });
+        const newCurrency = document.getElementById('u-currency').value;
+        if ((u.preferred_currency || '') !== newCurrency) {
+          await adminApi('admin_set_user_currency', { p_user_id: u.id, p_currency: newCurrency || null });
+        }
         UI.toast('Customer updated.', 'success');
         modal.close();
         load();

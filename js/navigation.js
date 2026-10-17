@@ -1,4 +1,4 @@
-// Raiffeisen Bank — App shell: sidebar, header, notifications, active states, mobile nav.
+// Marvin Bank — App shell: sidebar, header, notifications, active states, mobile nav.
 
 const NAV_ITEMS = [
   { label: 'Dashboard', icon: 'dashboard', href: 'dashboard.html' },
@@ -60,6 +60,11 @@ const AppShell = {
       this.profile = { full_name: user.email || 'User', email: user.email || '' };
     }
 
+    // Per-user display currency (admin-managed, stored on the profile).
+    if (window.FX && FX.setPreferredCurrency) {
+      FX.setPreferredCurrency(this.profile && this.profile.preferred_currency);
+    }
+
     // Security PIN guard: existing accounts without a PIN must set one first.
     try {
       const hasPin = await UI.rpc('customer_has_pin', {});
@@ -97,14 +102,14 @@ const AppShell = {
       return '<a href="' + it.href + '" class="' + active + '">' + icon(it.icon) + '<span>' + it.label + '</span></a>';
     }).join('');
     return '<aside class="sidebar" id="sidebar">' +
-      '<div class="brand"><img src="' + window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + 'assets/logos/logo-light.svg" alt="Raiffeisen Bank"></div>' +
+      '<div class="brand"><img src="' + window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + 'assets/logos/logo-light.svg" alt="Marvin Bank"></div>' +
       '<nav class="side-nav">' + items +
       '<div class="nav-label">Account</div>' +
       '<a href="profile.html"><span class="icon">' + ICONS.profile + '</span><span>Profile</span></a>' +
       '<a href="settings.html"><span class="icon">' + ICONS.settings + '</span><span>Settings</span></a>' +
       '<a href="#" id="nav-logout"><span class="icon">' + ICONS.logout + '</span><span>Log Out</span></a>' +
       '</nav>' +
-      '<div class="sidebar-foot">Raiffeisen Bank<br>&copy; ' + new Date().getFullYear() + ' All rights reserved.</div>' +
+      '<div class="sidebar-foot">Marvin Bank<br>&copy; ' + new Date().getFullYear() + ' All rights reserved.</div>' +
       '</aside>';
   },
 

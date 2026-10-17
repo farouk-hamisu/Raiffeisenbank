@@ -1,4 +1,4 @@
-// Raiffeisen Bank — Live exchange rate module (Frankfurter API)
+// Marvin Bank — Live exchange rate module (Frankfurter API)
 // Shared by bitcoin.js and dashboard.js
 var ExchangeRates = (function () {
   var cache = {};

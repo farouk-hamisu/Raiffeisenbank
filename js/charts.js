@@ -1,4 +1,4 @@
-// Raiffeisen Bank — Minimal canvas chart helpers (line + bar + doughnut). No dependencies.
+// Marvin Bank — Minimal canvas chart helpers (line + bar + doughnut). No dependencies.
 (function (global) {
   'use strict';
 

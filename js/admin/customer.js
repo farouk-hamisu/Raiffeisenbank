@@ -1,4 +1,4 @@
-// Raiffeisen Bank — Admin customer detail module
+// Marvin Bank — Admin customer detail module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;
@@ -13,11 +13,27 @@
   async function load() {
     try {
       data = await adminApi('admin_get_user', { p_user_id: id });
+      // While viewing this customer, render ALL amounts in their preferred
+      // display currency (display-only; stored values are unchanged).
+      if (window.FX && FX.setPreferredCurrency) {
+        FX.setPreferredCurrency(data.profile && data.profile.preferred_currency);
+      }
       renderMasthead();
       renderTab(activeTab);
     } catch (e) {
       UI.toast(UI.apiErrorMessage(e), 'error');
     }
+  }
+
+  // Display-currency <option> list (matches js/fx.js supported fiats).
+  function currencyOptions(selected) {
+    const fiats = (window.FX && FX.fiats) ? FX.fiats() : [{ code: 'USD', name: 'US Dollar' }];
+    let opts = '<option value="">Language default</option>';
+    fiats.forEach(function (f) {
+      opts += '<option value="' + f.code + '"' + (selected === f.code ? ' selected' : '') + '>' +
+        f.code + ' \u2014 ' + f.name + '</option>';
+    });
+    return opts;
   }
 
   function renderMasthead() {
@@ -37,12 +53,14 @@
           '<button class="btn btn-outline btn-sm" data-act="account">+ Account</button>' +
         '</div>' +
       '</div>';
-    document.querySelector('[data-act=suspend]').addEventListener('click', function () {
+    const suspendBtn = document.querySelector('[data-act=suspend]');
+    if (suspendBtn) suspendBtn.addEventListener('click', function () {
       UI.confirmDialog('Suspend this customer?', async function () {
         try { await adminApi('admin_suspend_user', { p_user_id: id }); UI.toast('Suspended.', 'success'); load(); } catch (e) { UI.toast(UI.apiErrorMessage(e), 'error'); }
       }, 'Suspend');
     });
-    document.querySelector('[data-act=activate]').addEventListener('click', async function () {
+    const activateBtn = document.querySelector('[data-act=activate]');
+    if (activateBtn) activateBtn.addEventListener('click', async function () {
       try { await adminApi('admin_activate_user', { p_user_id: id }); UI.toast('Activated.', 'success'); load(); } catch (e) { UI.toast(UI.apiErrorMessage(e), 'error'); }
     });
     document.querySelector('[data-act=notify]').addEventListener('click', function () {
@@ -125,6 +143,15 @@
           : '<button class="btn btn-success btn-sm" data-outgoing-enable>Enable outgoing transfers</button>') +
       '</div>';
     }
+    html += '<div class="card mb-3">' +
+      '<h3 class="card-title mb-2">Display currency</h3>' +
+      '<p class="text-muted mb-2">All amounts shown for this customer use this currency. Stored values are unchanged.</p>' +
+      '<div class="flex gap-1" style="align-items:center">' +
+        '<select class="select" id="cur-select" style="max-width:280px">' + currencyOptions(p.preferred_currency) + '</select>' +
+        '<button class="btn btn-primary btn-sm" id="cur-save">Save</button>' +
+      '</div>' +
+      '<div class="form-error" id="cur-error" style="margin-top:8px"></div>' +
+      '</div>';
     html += '<div class="card"><h3 class="card-title mb-3">Personal information</h3>' +
       '<div class="detail-grid">' +
         '<div class="detail-item"><div class="k">Full name</div><div class="v">' + UI.escapeHtml(p.full_name || '—') + '</div></div>' +
@@ -186,10 +213,12 @@
     if (!rows.length) return UI.emptyState('No transactions');
     return '<div class="card"><div class="table-wrap"><table class="table mobile-cards"><thead><tr><th>Reference</th><th>Type</th><th>Direction</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>' +
       rows.map(function (t) {
-        return '<tr><td data-label="Reference">' + UI.escapeHtml(t.reference) + '</td>' +
+        const credit = t.direction === 'credit';
+        return '<tr><td data-label="Reference"><span class="cell-main mono">' + UI.escapeHtml(t.reference) + '</span>' +
+            (t.description ? '<div class="cell-sub">' + UI.escapeHtml(t.description) + '</div>' : '') + '</td>' +
           '<td data-label="Type">' + UI.typeLabel(t.type) + '</td>' +
-          '<td data-label="Direction">' + UI.escapeHtml(t.direction) + '</td>' +
-          '<td data-label="Amount" class="' + (t.direction === 'credit' ? 'amount-credit' : 'amount-debit') + '">' + UI.money(t.amount, t.currency) + '</td>' +
+          '<td data-label="Direction">' + (credit ? 'Credit' : 'Debit') + '</td>' +
+          '<td data-label="Amount" class="' + (credit ? 'amount-credit' : 'amount-debit') + '">' + (credit ? '+' : '−') + UI.money(t.amount, t.currency) + '</td>' +
           '<td data-label="Status">' + UI.badge(t.status) + '</td>' +
           '<td data-label="Date">' + UI.formatDateTime(t.created_at) + '</td></tr>';
       }).join('') + '</tbody></table></div></div>';
@@ -273,6 +302,22 @@
     const block = e.target.closest('[data-card-block]');
     const disableOut = e.target.closest('[data-outgoing-disable]');
     const enableOut = e.target.closest('[data-outgoing-enable]');
+    const saveCur = e.target.closest('#cur-save');
+    if (saveCur) {
+      const sel = document.getElementById('cur-select');
+      const err = document.getElementById('cur-error');
+      err.textContent = '';
+      saveCur.disabled = true;
+      try {
+        await adminApi('admin_set_user_currency', { p_user_id: id, p_currency: sel.value || null });
+        UI.toast('Display currency updated.', 'success');
+        await load(); // re-render every tab in the new currency
+      } catch (curErr) {
+        err.textContent = UI.apiErrorMessage(curErr);
+        saveCur.disabled = false;
+      }
+      return;
+    }
     try {
       if (suspend) {
         await adminApi('admin_change_account_status', { p_account_id: suspend.getAttribute('data-acc-suspend'), p_status: 'suspended' });

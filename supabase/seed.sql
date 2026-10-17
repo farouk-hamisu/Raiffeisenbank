@@ -1,7 +1,7 @@
--- Raiffeisen Bank - Seed data (development / demo only)
+-- Marvin Bank - Seed data (development / demo only)
 -- NOT for production. Credentials:
---   Customer: demo@raiffeisenbank.com  /  Demo@1234
---   Admin:    admin@raiffeisenbank.com /  Admin@123
+--   Customer: demo@marvinbank.com  /  Demo@1234
+--   Admin:    admin@marvinbank.com /  Admin@123
 
 -- Prevent the profile trigger from auto-creating random accounts during
 -- seeding; accounts are created explicitly below. Re-enabled at the end.
@@ -62,14 +62,14 @@ EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'admin_roles: skipped'; END $$;
 
 DO $$ BEGIN
   insert into public.admin_users (email, password_hash, full_name, role_id, status)
-  select 'admin@raiffeisenbank.com', public.admin_hash_password('Admin@123'), 'System Administrator', r.id, 'active'
+  select 'admin@marvinbank.com', public.admin_hash_password('Admin@123'), 'System Administrator', r.id, 'active'
   from public.admin_roles r where r.name = 'super_admin'
   on conflict (email) do nothing;
 EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'admin_users: skipped'; END $$;
 
 DO $$ BEGIN
   insert into public.system_settings (key, value, description) values
-    ('bank_name', '"Raiffeisen Bank"', 'Institution display name'),
+    ('bank_name', '"Marvin Bank"', 'Institution display name'),
     ('currency', '"USD"', 'Default currency code'),
     ('local_transfer_fee', '0', 'Flat local transfer fee'),
     ('intl_transfer_fee', '15', 'Flat international transfer fee'),
@@ -86,7 +86,7 @@ DO $$ BEGIN
     '00000000-0000-0000-0000-000000000001',
     '00000000-0000-0000-0000-000000000000',
     'authenticated', 'authenticated',
-    'demo@raiffeisenbank.com', public.admin_hash_password('Demo@1234'), now(),
+    'demo@marvinbank.com', public.admin_hash_password('Demo@1234'), now(),
     jsonb_build_object('provider', 'email', 'providers', '["email"]'),
     jsonb_build_object('full_name', 'Alex Morgan'),
     now(), now(), '', '', '', ''
@@ -99,7 +99,7 @@ DO $$ BEGIN
     gen_random_uuid(),
     '00000000-0000-0000-0000-000000000001',
     '00000000-0000-0000-0000-000000000001',
-    jsonb_build_object('sub', '00000000-0000-0000-0000-000000000001', 'email', 'demo@raiffeisenbank.com'),
+    jsonb_build_object('sub', '00000000-0000-0000-0000-000000000001', 'email', 'demo@marvinbank.com'),
     'email', now(), now(), now()
   ) on conflict (provider, provider_id) do nothing;
 EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'auth.identities: skipped'; END $$;
@@ -107,7 +107,7 @@ EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'auth.identities: skipped'; END $$;
 DO $$ BEGIN
   insert into public.profiles (id, email, full_name, phone, avatar_url, address, city, country, status, kyc_status, date_of_birth)
   values (
-    '00000000-0000-0000-0000-000000000001', 'demo@raiffeisenbank.com', 'Alex Morgan',
+    '00000000-0000-0000-0000-000000000001', 'demo@marvinbank.com', 'Alex Morgan',
     '+1 (415) 555-0132', null, '2210 Market Street', 'San Francisco', 'United States', 'active', 'verified', '1991-04-12'
   )
   on conflict (id) do update set
@@ -134,8 +134,8 @@ EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'account_balances: skipped'; END $$;
 
 DO $$ BEGIN
   insert into public.beneficiaries (user_id, name, bank_name, account_number, country, currency, is_international) values
-    ('00000000-0000-0000-0000-000000000001', 'Jordan Blake', 'Raiffeisen Bank', '4800000000000022', 'United States', 'USD', false),
-    ('00000000-0000-0000-0000-000000000001', 'Sophia Carter', 'Raiffeisen Bank', '4800000000000023', 'United States', 'USD', false)
+    ('00000000-0000-0000-0000-000000000001', 'Jordan Blake', 'Marvin Bank', '4800000000000022', 'United States', 'USD', false),
+    ('00000000-0000-0000-0000-000000000001', 'Sophia Carter', 'Marvin Bank', '4800000000000023', 'United States', 'USD', false)
   on conflict do nothing;
 EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'beneficiaries: skipped'; END $$;
 

@@ -1,4 +1,4 @@
-// Raiffeisen Bank — Customer dashboard module (simplified)
+// Marvin Bank — Customer dashboard module (simplified)
 (async function () {
   const profile = await AppShell.init({ title: 'Dashboard' });
   if (!profile) return;
@@ -129,14 +129,14 @@
     const card = state.cards[0];
 
     if (!card) {
-      el.innerHTML = '<div class="dash-card-bank">Raiffeisen Bank</div><div class="dash-card-number">No card issued</div><div class="dash-card-status" style="color:var(--muted);background:var(--surface-2)">Inactive</div>';
+      el.innerHTML = '<div class="dash-card-bank">Marvin Bank</div><div class="dash-card-number">No card issued</div><div class="dash-card-status" style="color:var(--muted);background:var(--surface-2)">Inactive</div>';
       return;
     }
 
     const lastFour = card.card_number ? card.card_number.slice(-4) : '••••';
     const statusClass = card.status === 'active' ? 'success' : card.status === 'frozen' ? 'warning' : 'danger';
 
-    el.innerHTML = '<div class="dash-card-bank">Raiffeisen Bank</div><div class="dash-card-number">•••• •••• •••• ' + lastFour + '</div><div class="dash-card-status badge-' + statusClass + '">' + UI.escapeHtml(card.status) + '</div>';
+    el.innerHTML = '<div class="dash-card-bank">Marvin Bank</div><div class="dash-card-number">•••• •••• •••• ' + lastFour + '</div><div class="dash-card-status badge-' + statusClass + '">' + UI.escapeHtml(card.status) + '</div>';
   }
 
   function renderTransactions(txs) {
@@ -161,11 +161,15 @@
     };
 
     el.innerHTML = '<div class="dash-tx-list">' + txs.map(function (t) {
-      const amount = (t.direction === 'credit' ? '+' : '-') + UI.money(t.amount, t.currency);
-      const amountClass = t.direction === 'credit' ? 'credit' : 'debit';
+      const credit = t.direction === 'credit';
+      const amount = (credit ? '+' : '−') + UI.money(t.amount, t.currency);
+      const amountClass = credit ? 'credit' : 'debit';
       const iconName = TX_ICONS[t.type] || 'transactions';
-      const title = UI.escapeHtml(t.recipient || t.sender || UI.typeLabel(t.type));
-      const sub = UI.typeLabel(t.type) + ' · ' + UI.timeAgo(t.created_at);
+      // Statement convention: what happened first, who was on the other end second.
+      const title = UI.escapeHtml(t.description || UI.typeLabel(t.type));
+      const cp = credit ? t.sender : t.recipient;
+      const sub = (credit ? 'Credit' : 'Debit') + ' · ' + UI.typeLabel(t.type) + ' · ' + UI.timeAgo(t.created_at) +
+        (cp ? ' · ' + (credit ? 'From ' : 'To ') + UI.escapeHtml(cp) : '');
 
       return '<div class="dash-tx-item">' +
         '<div class="dash-tx-icon">' + icon(iconName) + '</div>' +

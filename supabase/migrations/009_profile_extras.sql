@@ -1,4 +1,4 @@
--- Raiffeisen Bank - Migration 009
+-- Marvin Bank - Migration 009
 -- Profile extras + storage bucket for avatars
 
 alter table public.profiles

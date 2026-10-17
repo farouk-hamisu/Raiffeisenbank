@@ -1,4 +1,4 @@
-// Raiffeisen Bank — i18n runtime (English ↔ Hungarian)
+// Marvin Bank — i18n runtime (English ↔ Hungarian)
 // ---------------------------------------------------------------
 // How it works:
 //   * Dictionary: window.LOCALE_HU  (js/locales/hu.js), keyed by the exact

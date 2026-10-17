@@ -143,7 +143,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .badge-gold { background: var(--gold-soft); color: var(--gold); }
 
 /* status badge helper */
-.badge-pending { background: var(--warning-soft); color: var(--warning); }
+.badge-pending, .badge-awaiting { background: var(--warning-soft); color: var(--warning); }
 .badge-processing { background: var(--info-soft); color: var(--info); }
 .badge-completed { background: var(--success-soft); color: var(--success); }
 .badge-active { background: var(--success-soft); color: var(--success); }

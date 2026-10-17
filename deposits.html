@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/forms.css">
   <link rel="stylesheet" href="css/tables.css">
   <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/deposits.css">
 </head>
 <body>
 <div class="page-loader" id="page-loader" role="status" aria-live="polite">
@@ -23,31 +24,91 @@
   </div>
   <div id="page-root">
     <div class="grid-2">
-      <div class="card">
-        <h3 class="card-title mb-2">Make a deposit</h3>
-        <div class="field"><label>Deposit to account</label><select class="select" id="d-account"></select></div>
-        <div class="field"><label>Method</label>
-          <select class="select" id="d-method">
-            <option value="bank_transfer">Bank Transfer</option>
-            <option value="cash">Cash</option>
-            <option value="cheque">Cheque</option>
-            <option value="card">Card</option>
-            <option value="online">Online</option>
-          </select>
+      <div class="card deposit-card">
+        <div class="deposit-head">
+          <span class="deposit-coin"><img src="assets/logos/bitcoin-logo-svgrepo-com.svg" alt="Bitcoin" width="34" height="34"></span>
+          <div class="deposit-head-text">
+            <h3 class="card-title">Deposit Bitcoin</h3>
+            <div class="deposit-network" id="d-network">Bitcoin (BTC) · native segwit</div>
+          </div>
         </div>
-        <div class="field"><label>Amount</label>
-          <div class="amount-field"><input type="number" class="input" id="d-amount" min="0.01" step="0.01" placeholder="0.00"><span class="currency-tag" id="d-currency-tag">$</span></div>
+
+        <div class="deposit-banner" role="note">
+          <div class="deposit-banner-title">Send only BTC on the Bitcoin network to this address.</div>
+          <div>Funds sent on any other network or asset cannot be recovered.</div>
         </div>
-        <div class="field"><label>Note <span class="text-muted">(optional)</span></label><input type="text" class="input" id="d-note" placeholder="e.g. Salary deposit"></div>
+
+        <div class="deposit-qr-wrap">
+          <div class="deposit-qr" id="d-qr" aria-label="Bitcoin deposit QR code"></div>
+          <div class="deposit-qr-caption" id="d-qr-caption">Scan from your wallet</div>
+        </div>
+
+        <div class="deposit-address">
+          <div class="deposit-address-label">Deposit address</div>
+          <div class="deposit-address-row">
+            <code class="deposit-address-value mono" id="d-address">—</code>
+            <button class="btn btn-ghost btn-sm deposit-copy" id="d-copy-address" type="button">Copy</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="d-account">Credit to account</label>
+          <select class="select" id="d-account"></select>
+        </div>
+
+        <div class="field">
+          <label for="d-amount">Amount</label>
+          <div class="amount-field">
+            <input type="number" class="input" id="d-amount" inputmode="decimal" min="0.0001" max="5" step="0.00000001" placeholder="0.00000000">
+            <span class="currency-tag" id="d-amount-tag">BTC</span>
+          </div>
+          <div class="deposit-hint" id="d-amount-hint"></div>
+        </div>
+
+        <div class="deposit-quote" id="d-quote" hidden>
+          <div class="deposit-quote-row"><span>You send</span><b id="d-quote-send">—</b></div>
+          <div class="deposit-quote-row"><span>Exact amount (sats)</span><b id="d-quote-sats">—</b></div>
+          <div class="deposit-quote-row"><span>You receive (approx.)</span><b id="d-quote-fiat">—</b></div>
+        </div>
+
         <div class="form-error" id="d-error"></div>
-        <button class="btn btn-primary btn-block" id="d-submit">Submit Deposit</button>
-        <div class="demo-credentials mt-3">
-          <strong>Deposit instructions</strong><br>
-          After submission your deposit is reviewed and approved by an administrator. Approved deposits are credited to your account automatically.
+        <button class="btn btn-primary btn-block" id="d-create" type="button">Create deposit request</button>
+
+        <div class="deposit-active" id="d-active" hidden>
+          <div class="deposit-active-head">
+            <span class="badge badge-awaiting" id="d-active-badge">Awaiting payment</span>
+            <span class="deposit-countdown" id="d-countdown"></span>
+          </div>
+          <div class="deposit-active-grid">
+            <div class="deposit-active-cell"><small>Send exactly</small><b class="mono" id="d-active-btc">—</b></div>
+            <div class="deposit-active-cell"><small>Reference</small><b class="mono" id="d-active-ref">—</b></div>
+          </div>
+          <p class="deposit-active-note" id="d-active-note">
+            Send exactly the amount above to the address on this page. Your balance is credited
+            automatically once the payment reaches the required confirmations.
+          </p>
+        </div>
+
+        <div class="deposit-steps">
+          <h4 class="deposit-steps-title">How to deposit Bitcoin</h4>
+          <ol class="deposit-steps-list">
+            <li>Choose the account to credit and enter the amount you want to deposit, then create a deposit request.</li>
+            <li>We reserve a unique amount for your request — this is what makes your payment identifiable.</li>
+            <li>Copy the address or scan the QR code and send exactly that amount from your wallet on the Bitcoin network.</li>
+            <li>Wait for the network confirmations required (shown in your deposit history).</li>
+            <li>Once confirmed, your balance and transaction history update automatically.</li>
+          </ol>
         </div>
       </div>
+
       <div class="card">
-        <div class="card-header"><div><h3 class="card-title">Deposit history</h3><div class="card-subtitle">Track the status of your deposits</div></div></div>
+        <div class="card-header">
+          <div>
+            <h3 class="card-title">Deposit history</h3>
+            <div class="card-subtitle">Track the status of your deposits</div>
+          </div>
+          <button class="btn btn-outline btn-sm" id="d-check" type="button">Check status</button>
+        </div>
         <div id="deposit-history"><div class="loading-block"><div class="spinner"></div><span>Loading deposits...</span></div></div>
       </div>
     </div>
@@ -61,6 +122,8 @@
   <script src="js/supabase.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/navigation.js"></script>
+  <script src="js/btc-price.js"></script>
+  <script src="js/qrcode.js"></script>
   <script src="js/deposits.js"></script>
   <script src="js/locales/hu.js"></script>
   <script src="js/i18n.js"></script>

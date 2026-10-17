@@ -60,11 +60,12 @@
 
   function renderSettings(settings) {
     const el = document.getElementById('settings-form');
-    const keys = ['bank_name', 'currency', 'local_transfer_fee', 'intl_transfer_fee', 'swap_fee_percent', 'maintenance_mode'];
+    const keys = ['bank_name', 'currency', 'local_transfer_fee', 'intl_transfer_fee', 'swap_fee_percent', 'btc_usd_rate', 'maintenance_mode'];
     const labels = {
       bank_name: 'Bank name', currency: 'Default currency',
       local_transfer_fee: 'Local transfer fee (flat)', intl_transfer_fee: 'International transfer fee (flat)',
-      swap_fee_percent: 'Currency swap fee %', maintenance_mode: 'Maintenance mode'
+      swap_fee_percent: 'Currency swap fee %', btc_usd_rate: 'Bitcoin price (USD)',
+      maintenance_mode: 'Maintenance mode'
     };
     el.innerHTML = keys.map(function (k) {
       const val = settings[k];
@@ -125,7 +126,7 @@
         const key = el.getAttribute('data-key');
         let val = el.value.trim();
         if (key === 'bank_name' || key === 'currency') val = '"' + val + '"';
-        if (['local_transfer_fee', 'intl_transfer_fee', 'swap_fee_percent'].includes(key)) val = String(Number(val) || 0);
+        if (['local_transfer_fee', 'intl_transfer_fee', 'swap_fee_percent', 'btc_usd_rate'].includes(key)) val = String(Number(val) || 0);
         await adminApi('admin_update_setting', { p_key: key, p_value: JSON.parse(val) });
       }
       UI.toast('Settings saved.', 'success');

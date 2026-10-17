@@ -481,7 +481,7 @@
   // ---------- Badges ----------
   function badge(status) {
     const map = {
-      pending: 'badge-pending', processing: 'badge-processing', completed: 'badge-completed',
+      pending: 'badge-pending', awaiting: 'badge-awaiting', processing: 'badge-processing', completed: 'badge-completed',
       active: 'badge-active', failed: 'badge-failed', cancelled: 'badge-cancelled',
       reversed: 'badge-reversed', rejected: 'badge-rejected', frozen: 'badge-frozen',
       blocked: 'badge-blocked', expired: 'badge-expired', under_review: 'badge-under_review',
@@ -555,6 +555,15 @@
       TRANSFER_NOT_VERIFIABLE: 'This transfer is not awaiting verification.',
       CODE_NOT_FOUND: 'Verification code not found.',
       WITHDRAWAL_NOT_FOUND: 'Withdrawal not found.',
+      BELOW_MINIMUM: 'The amount is below the minimum deposit for this asset.',
+      ABOVE_MAXIMUM: 'The amount exceeds the maximum deposit for this asset.',
+      TOO_MANY_ACTIVE_DEPOSITS: 'You already have deposit requests in progress. Wait for them to complete or expire before creating another.',
+      BTC_ADDRESS_NOT_CONFIGURED: 'Bitcoin deposits are not configured yet. Please contact support.',
+      AMOUNT_TAG_EXHAUSTED: 'Could not reserve a unique amount for your request. Please try a slightly different amount.',
+      AMOUNT_TOO_SMALL: 'The entered amount is too small to credit.',
+      RATE_UNAVAILABLE: 'No exchange rate is currently available. Please try again shortly.',
+      DEPOSIT_NOT_VERIFIED: 'This deposit has not been verified on the Bitcoin network yet.',
+      INVALID_AMOUNT: 'Enter a valid deposit amount.',
       'Bad Request': 'The request was invalid. Please check your input.'
     };
     return map[code] || 'An unexpected error occurred. Please try again later.';

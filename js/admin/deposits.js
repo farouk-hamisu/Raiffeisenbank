@@ -6,7 +6,7 @@
 
   const PAGE = 12;
   let page = 1;
-  const STATUSES = ['pending', 'processing', 'completed', 'failed', 'rejected'];
+  const STATUSES = ['awaiting', 'pending', 'processing', 'completed', 'expired', 'failed', 'rejected'];
 
   document.getElementById('f-status').innerHTML = '<option value="">All statuses</option>' + STATUSES.map(function (s) { return '<option value="' + s + '">' + UI.typeLabel(s) + '</option>'; }).join('');
 
@@ -35,13 +35,13 @@
       rows.map(function (d) {
         return '<tr><td data-label="Reference"><span class="cell-main">' + UI.escapeHtml(d.reference) + '</span></td>' +
           '<td data-label="User">' + UI.escapeHtml(d.user_email || '—') + '</td>' +
-          '<td data-label="Method">' + UI.escapeHtml(d.method) + '</td>' +
+          '<td data-label="Method">' + UI.escapeHtml(d.method === 'crypto' ? 'Crypto (BTC)' : d.method) + '</td>' +
           '<td data-label="Amount" class="amount-credit">' + UI.money(d.amount, d.currency) + '</td>' +
           '<td data-label="Status">' + UI.badge(d.status) + '</td>' +
           '<td data-label="Date">' + UI.formatDateTime(d.created_at) + '</td>' +
           '<td data-label="Actions"><div class="row-actions">' +
             '<button class="row-action" data-view="' + d.id + '" title="View">' + ICONS.eye + '</button>' +
-            (['pending', 'processing'].includes(d.status)
+            (d.method !== 'crypto' && ['pending', 'processing'].includes(d.status)
               ? '<button class="row-action success" data-status="' + d.id + '" data-val="completed" title="Approve">' + ICONS.check + '</button>' +
                 '<button class="row-action danger" data-status="' + d.id + '" data-val="rejected" title="Reject">' + ICONS.x + '</button>'
               : '') +
@@ -59,6 +59,25 @@
             '<div class="detail-item"><div class="k">User</div><div class="v">' + UI.escapeHtml(d.user_email || '—') + '</div></div>' +
             '<div class="detail-item"><div class="k">Method</div><div class="v">' + UI.escapeHtml(d.method) + '</div></div>' +
             '<div class="detail-item"><div class="k">Amount</div><div class="v">' + UI.money(d.amount, d.currency) + '</div></div>' +
+            (d.method === 'crypto'
+              ? '<div class="detail-item"><div class="k">Requested</div><div class="v">' +
+                  (d.expected_amount
+                    ? Number(d.expected_amount).toFixed(8) + ' BTC · ' +
+                      Number(d.expected_sats || 0).toLocaleString('en-US') + ' sats'
+                    : '—') + '</div></div>' +
+                (d.status === 'processing'
+                  ? '<div class="detail-item"><div class="k">Confirmations</div><div class="v">' +
+                    (Number(d.confirmations) || 0) + ' / ' + (Number(d.required_confirmations) || 1) + '</div></div>'
+                  : '') +
+                (d.tx_hash
+                  ? '<div class="detail-item"><div class="k">Transaction</div><div class="v mono" style="word-break:break-all">' +
+                    UI.escapeHtml(d.tx_hash) + '</div></div>'
+                  : '') +
+                (d.monitor_note
+                  ? '<div class="detail-item"><div class="k">Monitor note</div><div class="v">' +
+                    UI.escapeHtml(d.monitor_note) + '</div></div>'
+                  : '')
+              : '') +
             '<div class="detail-item"><div class="k">Note</div><div class="v">' + UI.escapeHtml(d.note || '—') + '</div></div>' +
             '<div class="detail-item"><div class="k">Created</div><div class="v">' + UI.formatDateTime(d.created_at) + '</div></div>' +
           '</div>',

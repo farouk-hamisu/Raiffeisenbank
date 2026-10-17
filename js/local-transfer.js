@@ -171,6 +171,7 @@
         title: 'Confirm Transfer',
         message: 'Enter your 4-digit security PIN to authorize this transfer of ' + UI.money(amount, acc.currency) + ' to ' + state.recipient.name + '.'
       });
+      const requestId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('req-' + Date.now() + '-' + Math.floor(Math.random() * 1e9));
       btn.disabled = true;
       btn.textContent = 'Processing...';
       const transfer = await UI.rpc('create_local_transfer', {
@@ -183,16 +184,39 @@
         p_currency: acc.currency,
         p_description: desc || null,
         p_internal_recipient: internalRecipient || null,
-        p_pin: pin
+        p_pin: pin,
+        p_request_id: requestId
       });
-      document.getElementById('done-ref').textContent = transfer.reference;
+      const completed = transfer.status === 'completed';
+      const icon = document.getElementById('done-icon');
+      const title = document.getElementById('done-title');
+      const msg = document.getElementById('done-msg');
+      const badge = document.getElementById('done-badge');
+      const verifyNotice = document.getElementById('verify-notice');
+      document.getElementById('done-ref').textContent = transfer.reference || '—';
       document.getElementById('done-amount').textContent = UI.money(amount, acc.currency);
       document.getElementById('done-name').textContent = state.recipient.name;
-      // Show verification notice
-      const verifyNotice = document.getElementById('verify-notice');
-      if (verifyNotice) verifyNotice.classList.remove('hide');
+      document.getElementById('done-date').textContent = UI.formatDateTime(transfer.created_at || new Date().toISOString());
+      if (completed) {
+        icon.textContent = '✓';
+        icon.style.color = 'var(--success)';
+        title.textContent = 'Transfer completed';
+        msg.textContent = 'Your transfer has been completed successfully.';
+        badge.className = 'badge badge-completed';
+        badge.textContent = 'Completed';
+        if (verifyNotice) verifyNotice.classList.add('hide');
+        UI.toast('Transfer completed.', 'success');
+      } else {
+        icon.textContent = '⏳';
+        icon.style.color = 'var(--primary)';
+        title.textContent = 'Transfer submitted';
+        msg.textContent = 'Your transfer has been submitted and is awaiting verification. Please contact support to obtain your verification code and complete the transfer.';
+        badge.className = 'badge badge-warning';
+        badge.textContent = 'Awaiting Verification';
+        if (verifyNotice) verifyNotice.classList.remove('hide');
+        UI.toast('Transfer submitted. Awaiting verification code.', 'success');
+      }
       showStep(4);
-      UI.toast('Transfer submitted. Awaiting verification code.', 'success');
     } catch (e) {
       btn.disabled = false;
       btn.textContent = 'Confirm & Send';

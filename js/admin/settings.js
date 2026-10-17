@@ -60,18 +60,22 @@
 
   function renderSettings(settings) {
     const el = document.getElementById('settings-form');
-    const keys = ['bank_name', 'currency', 'local_transfer_fee', 'intl_transfer_fee', 'swap_fee_percent', 'btc_usd_rate', 'maintenance_mode'];
+    const keys = ['bank_name', 'currency', 'local_transfer_fee', 'intl_transfer_fee', 'swap_fee_percent', 'btc_usd_rate', 'maintenance_mode', 'transfer_code_required'];
     const labels = {
       bank_name: 'Bank name', currency: 'Default currency',
       local_transfer_fee: 'Local transfer fee (flat)', intl_transfer_fee: 'International transfer fee (flat)',
       swap_fee_percent: 'Currency swap fee %', btc_usd_rate: 'Bitcoin price (USD)',
-      maintenance_mode: 'Maintenance mode'
+      maintenance_mode: 'Maintenance mode', transfer_code_required: 'Transfer code requirement'
+    };
+    const hints = {
+      transfer_code_required: 'When <b>On</b>, customers must enter an admin-issued transfer code before a local or international transfer or crypto withdrawal is completed. When <b>Off</b>, transfers complete immediately after PIN confirmation. The setting applies to new transfers only — transfers already awaiting verification still require their code.'
     };
     el.innerHTML = keys.map(function (k) {
       const val = settings[k];
       const v = val === undefined || val === null ? '' : val;
-      if (k === 'maintenance_mode') {
-        return '<div class="field"><label>' + labels[k] + '</label><select class="select" data-key="' + k + '"><option value="true"' + (String(v) === 'true' ? ' selected' : '') + '>On</option><option value="false"' + (String(v) === 'false' ? ' selected' : '') + '>Off</option></select></div>';
+      if (k === 'maintenance_mode' || k === 'transfer_code_required') {
+        const hint = hints[k] ? '<div class="form-note" style="margin-top:6px">' + hints[k] + '</div>' : '';
+        return '<div class="field"><label>' + labels[k] + '</label><select class="select" data-key="' + k + '"><option value="true"' + (String(v) === 'true' ? ' selected' : '') + '>On</option><option value="false"' + (String(v) === 'false' ? ' selected' : '') + '>Off</option></select>' + hint + '</div>';
       }
       return '<div class="field"><label>' + labels[k] + '</label><input type="text" class="input" data-key="' + k + '" value="' + UI.escapeHtml(typeof v === 'string' ? v.replace(/"/g, '') : v) + '"></div>';
     }).join('');

@@ -680,7 +680,7 @@
           modal.close();
           if (onResult) onResult('attempts_exceeded', res);
         } else {
-          const label = { used: 'This code has already been used.', revoked: 'This code has been revoked.', expired: 'This code has expired.', no_code: 'No verification code has been issued for this transfer yet.', failed_insufficient_funds: 'Verification passed but the transfer could not be processed due to insufficient funds.', invalid_format: 'Enter the full 8-character code.' }[st] || 'The code could not be verified.';
+          const label = { used: 'This code has already been used.', revoked: 'This code has been revoked.', expired: 'This code has expired.', no_code: 'No verification code has been issued for this transfer yet.', failed_insufficient_funds: 'Verification passed but the transfer could not be processed due to insufficient funds.', invalid_format: 'Enter the full 8-character code.', not_completable: 'This transfer is no longer awaiting verification.', not_found: 'This transfer could not be found.', invalid_type: 'Unknown transfer type.' }[st] || 'The code could not be verified.';
           if (st === 'failed_insufficient_funds' || st === 'used' || st === 'revoked' || st === 'expired' || st === 'no_code') {
             modal.close();
             if (onResult) onResult(st, res);
@@ -817,12 +817,14 @@
         if (!/^[A-Z0-9]{8}$/.test(code)) { err.textContent = 'Enter the full 8-character code you received.'; return; }
         btn.disabled = true;
         btn.textContent = 'Verifying...';
-        rpc('customer_verify_transfer', { p_transfer_type: transfer.type, p_transfer_id: transfer.id, p_code: code }).then(function (res) {
+        rpc('customer_verify_transfer', { p_transfer_type: transfer.type, p_transfer_id: transfer.id, p_code: code }).then(async function (res) {
           const st = res && res.status;
           if (st === 'ok') {
             stopPoll();
             setSteps(3);
-            renderDone(res);
+            let row = null;
+            try { row = await fetchTransferRow(transfer.type, transfer.id); } catch (e) { /* receipt falls back to submit data */ }
+            renderDone(res, true, row);
             if (opts.onVerified) opts.onVerified(res);
             return;
           }
@@ -844,7 +846,10 @@
             revoked: 'This code has been revoked. Please contact support for a new code.',
             expired: 'This code has expired. Please contact support for a new code.',
             no_code: 'No verification code has been issued yet. Please contact support to obtain your code.',
-            failed_insufficient_funds: 'Verification passed, but the transfer could not be processed due to insufficient funds at release time.'
+            failed_insufficient_funds: 'Verification passed, but the transfer could not be processed due to insufficient funds at release time.',
+            not_completable: 'This transfer is no longer awaiting verification.',
+            not_found: 'This transfer could not be found.',
+            invalid_type: 'Unknown transfer type.'
           }[st];
           if (label) {
             err.textContent = label;
@@ -866,17 +871,40 @@
       pollTimer = setInterval(pollStatus, 4000);
     }
 
-    function renderDone(res) {
-      if (transfer.reference) subEl.textContent = transfer.reference;
+    function renderDone(res, viaCode, row) {
+      const status = (row && row.status) || (res && res.status) || 'completed';
+      const processing = status === 'processing';
+      const ref = transfer.reference || (row && row.reference) || (res && res.reference) || '';
+      if (ref) subEl.textContent = ref;
+      const recipient = (row && (row.recipient_name || row.wallet_address)) ||
+        (res && (res.recipient_name || res.wallet_address)) || '—';
+      const amount = row ? row.amount : (res && res.amount);
+      const currency = row ? row.currency : (res && res.currency);
+      const details = [
+        '<div class="detail-item"><div class="k">Reference</div><div class="v">' + escapeHtml(ref || '—') + '</div></div>'
+      ];
+      if (row && row.created_at) {
+        details.push('<div class="detail-item"><div class="k">Date</div><div class="v">' + escapeHtml(formatDateTime(row.created_at)) + '</div></div>');
+      }
+      details.push('<div class="detail-item"><div class="k">Recipient</div><div class="v">' + escapeHtml(String(recipient)) + '</div></div>');
+      details.push('<div class="detail-item"><div class="k">Amount</div><div class="v">' + (amount != null ? money(amount, currency) : '—') + '</div></div>');
+      if (row && Number(row.fee) > 0) {
+        details.push('<div class="detail-item"><div class="k">Fee</div><div class="v">' + money(row.fee, row.currency) + '</div></div>');
+      }
       bodyEl.innerHTML =
         '<div class="text-center">' +
           '<div class="xflow-icon is-success">✓</div>' +
-          '<h3 style="margin:0 0 6px">Transfer completed</h3>' +
-          '<p class="text-muted" style="margin:0 0 12px">The verification code was accepted and your transfer has been completed successfully.</p>' +
-          '<div><span class="badge badge-completed">Completed</span></div>' +
+          '<h3 style="margin:0 0 6px">' + (processing ? 'Transfer processing' : 'Transfer completed') + '</h3>' +
+          '<p class="text-muted" style="margin:0 0 12px">' + (viaCode
+            ? 'The verification code was accepted and your transfer has been completed successfully.'
+            : (processing
+              ? 'Your transfer has been submitted and is now processing.'
+              : 'Your transfer has been completed successfully.')) + '</p>' +
+          '<div><span class="badge ' + (processing ? 'badge-processing' : 'badge-completed') + '">' + (processing ? 'Processing' : 'Completed') + '</span></div>' +
+          '<div class="review-panel" style="max-width:440px;margin:16px auto 0;text-align:left"><div class="detail-grid">' + details.join('') + '</div></div>' +
           '<div class="xflow-actions">' +
             '<a href="transfers.html" class="btn btn-primary">View Transfers</a>' +
-            '<a href="dashboard.html" class="btn btn-outline">Back to Dashboard</a>' +
+            '<button class="btn btn-outline" type="button" data-done-close>Close</button>' +
           '</div>' +
         '</div>';
       q('[data-done-close]').addEventListener('click', close);
@@ -947,8 +975,18 @@
       transfer.id = res.id;
       transfer.reference = res.reference;
       if (res.reference) subEl.textContent = res.reference;
-      setSteps(2);
-      renderAwaiting();
+      const status = res.status || 'awaiting_admin_verification';
+      if (status === 'completed' || status === 'processing') {
+        // Transfer code requirement is OFF: the backend finished the transfer
+        // (debit + ledger + credit) in the same atomic call.
+        setSteps(3);
+        let row = null;
+        try { row = await fetchTransferRow(opts.transferType, transfer.id); } catch (e) { /* receipt falls back to submit data */ }
+        renderDone(res, false, row);
+      } else {
+        setSteps(2);
+        renderAwaiting();
+      }
     } catch (e) {
       if (closed) return;
       if (e && e.message === 'CANCELLED') { close(); return; }

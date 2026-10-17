@@ -85,15 +85,16 @@
     </div>
 
     <div id="step-4" class="card hide text-center">
-      <div style="font-size:44px;color:var(--primary)">⏳</div>
-      <h3 class="card-title">Transfer submitted</h3>
-      <p class="text-muted">Your transfer has been submitted and is awaiting verification. Please contact support to obtain your verification code and complete the transfer.</p>
+      <div id="done-icon" style="font-size:44px;color:var(--primary)">⏳</div>
+      <h3 class="card-title" id="done-title">Transfer submitted</h3>
+      <p class="text-muted" id="done-msg">Your transfer has been submitted and is awaiting verification. Please contact support to obtain your verification code and complete the transfer.</p>
       <div class="review-panel" style="max-width:420px;margin:0 auto">
         <div class="detail-grid">
           <div class="detail-item"><div class="k">Reference</div><div class="v" id="done-ref">—</div></div>
-          <div class="detail-item"><div class="k">Status</div><div class="v"><span class="badge badge-warning">Awaiting Verification</span></div></div>
+          <div class="detail-item"><div class="k">Status</div><div class="v"><span class="badge badge-warning" id="done-badge">Awaiting Verification</span></div></div>
           <div class="detail-item"><div class="k">Amount</div><div class="v" id="done-amount">—</div></div>
           <div class="detail-item"><div class="k">Recipient</div><div class="v" id="done-name">—</div></div>
+          <div class="detail-item"><div class="k">Date</div><div class="v" id="done-date">—</div></div>
         </div>
       </div>
       <div id="verify-notice" class="alert alert-info hide" style="max-width:420px;margin:16px auto 0">

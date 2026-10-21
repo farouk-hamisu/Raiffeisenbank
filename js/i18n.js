@@ -1,8 +1,9 @@
-// Marvin Bank — i18n runtime (English ↔ Hungarian)
+// Marvin Bank — i18n runtime (English ↔ Hungarian ↔ Italian)
 // ---------------------------------------------------------------
 // How it works:
-//   * Dictionary: window.LOCALE_HU  (js/locales/hu.js), keyed by the exact
-//     English source string (whitespace normalised). Keys containing '*'
+//   * Dictionaries: window.LOCALE_HU (js/locales/hu.js) and window.LOCALE_IT
+//     (js/locales/it.js), keyed by the exact English source string
+//     (whitespace normalised). Keys containing '*'
 //     are patterns: '*' captures a runtime value (amount, name, date...).
 //   * On load the whole DOM is walked once and every string is swapped.
 //     The original English text is remembered on each node, so switching
@@ -16,19 +17,21 @@
 //     persists the choice and re-translates the page in place: JS-rendered
 //     content is re-translated from the remembered sources, and the FX layer
 //     (js/fx.js) re-renders dates and monetary values in the currency that
-//     belongs to the language (EN -> USD, HU -> HUF) — no reload needed.
+//     belongs to the language (EN/IT -> USD, HU -> HUF) — no reload needed.
 // ---------------------------------------------------------------
 (function () {
   'use strict';
 
   var STORAGE_KEY = 'rb_lang';
+  var LANGS = ['en', 'hu', 'it'];
   var ATTRS = ['placeholder', 'title', 'alt', 'aria-label', 'aria-placeholder',
                'aria-description', 'data-label', 'data-tooltip', 'data-confirm'];
   var SKIP_TAGS = { SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, TEMPLATE: 1, SVG: 1, CANVAS: 1, CODE: 1, PRE: 1 };
   var VALUE_TAGS = { INPUT: 1, BUTTON: 1 };
 
   var lang = detectLang();
-  var dict = null;          // EN -> HU
+  var dict = null;          // EN -> HU / EN -> IT (per dictLang)
+  var dictLang = null;      // language the cached dict/patterns belong to
   var patterns = null;      // [{re, parts, literal, score}]
   var fragExactRe = null;   // piecewise pass 1: whole keys
   var fragPatRe = null;     // piecewise pass 2: pattern keys ('*')
@@ -40,13 +43,15 @@
   function detectLang() {
     var stored = null;
     try { stored = localStorage.getItem(STORAGE_KEY); } catch (e) {}
-    if (stored === 'en' || stored === 'hu') return stored;
+    if (stored && LANGS.indexOf(stored) !== -1) return stored;
     var nav = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
-    return nav.indexOf('hu') === 0 ? 'hu' : 'en';
+    if (nav.indexOf('hu') === 0) return 'hu';
+    if (nav.indexOf('it') === 0) return 'it';
+    return 'en';
   }
 
   function setLang(next, opts) {
-    if (next !== 'en' && next !== 'hu') return;
+    if (LANGS.indexOf(next) === -1) return;
     try { localStorage.setItem(STORAGE_KEY, next); } catch (e) {}
     lang = next;
     document.documentElement.lang = next;
@@ -55,14 +60,23 @@
     else apply();
   }
 
-  function toggleLang() { setLang(lang === 'hu' ? 'en' : 'hu'); }
+  function toggleLang() {
+    setLang(LANGS[(LANGS.indexOf(lang) + 1) % LANGS.length]);
+  }
 
-  function locale() { return lang === 'hu' ? 'hu-HU' : 'en-US'; }
+  function locale() {
+    return lang === 'hu' ? 'hu-HU' : (lang === 'it' ? 'it-IT' : 'en-US');
+  }
 
   // ------------------------------------------------------------- dictionary
   function ensureDict() {
-    if (dict) return dict;
-    dict = window.LOCALE_HU || {};
+    if (dict && dictLang === lang) return dict;
+    // Language changed — drop the cached dictionary/patterns and rebuild
+    // from the dictionary that belongs to the active language.
+    dict = lang === 'hu' ? (window.LOCALE_HU || {})
+        : lang === 'it' ? (window.LOCALE_IT || {})
+        : {};
+    dictLang = lang;
     patterns = [];
     for (var k in dict) {
       if (Object.prototype.hasOwnProperty.call(dict, k) && k.indexOf('*') !== -1) {
@@ -245,11 +259,26 @@
   }
 
   // ------------------------------------------------------------- switcher
+  var LANG_META = {
+    en: { code: 'EN', label: 'English' },
+    hu: { code: 'HU', label: 'Magyar' },
+    it: { code: 'IT', label: 'Italiano' }
+  };
+
   function switcherHtml() {
-    return '<button type="button" data-rb-lang="en" lang="en" class="rb-lang-opt' + (lang === 'en' ? ' is-on' : '') +
-        '" aria-pressed="' + (lang === 'en') + '" aria-label="English">EN</button>' +
-      '<button type="button" data-rb-lang="hu" lang="hu" class="rb-lang-opt' + (lang === 'hu' ? ' is-on' : '') +
-        '" aria-pressed="' + (lang === 'hu') + '" aria-label="Magyar">HU</button>';
+    return LANGS.map(function (code) {
+      var meta = LANG_META[code];
+      return '<button type="button" data-rb-lang="' + code + '" lang="' + code +
+        '" class="rb-lang-opt' + (lang === code ? ' is-on' : '') +
+        '" aria-pressed="' + (lang === code) + '" aria-label="' + meta.label + '">' +
+        meta.code + '</button>';
+    }).join('');
+  }
+
+  function switcherLabel() {
+    if (lang === 'hu') return 'Nyelvválasztó';
+    if (lang === 'it') return 'Selettore lingua';
+    return 'Language selector';
   }
 
   function ensureStyles() {
@@ -335,7 +364,7 @@
       el.id = 'rb-lang-switch';
       el.setAttribute('data-i18n-skip', '1');
       el.setAttribute('role', 'group');
-      el.setAttribute('aria-label', lang === 'hu' ? 'Nyelvválasztó' : 'Language selector');
+      el.setAttribute('aria-label', switcherLabel());
       el.innerHTML = switcherHtml();
       el.addEventListener('click', function (e) {
         var btn = e.target.closest ? e.target.closest('[data-rb-lang]') : null;
@@ -343,6 +372,10 @@
         var next = btn.getAttribute('data-rb-lang');
         if (next && next !== lang) setLang(next);
       });
+    } else if (el.getAttribute('aria-label') !== switcherLabel()) {
+      el.setAttribute('aria-label', switcherLabel());
+      var html = switcherHtml();
+      if (el.innerHTML !== html) el.innerHTML = html;
     }
     var host = pickHost(el);
     if (host) {
@@ -397,6 +430,7 @@
   window.I18N = {
     lang: function () { return lang; },
     isHu: function () { return lang === 'hu'; },
+    isIt: function () { return lang === 'it'; },
     t: t,
     setLang: setLang,
     toggleLang: toggleLang,

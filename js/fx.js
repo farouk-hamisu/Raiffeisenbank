@@ -2,7 +2,7 @@
 // ---------------------------------------------------------------
 // The display currency is the user's admin-managed preferred currency
 // (profiles.preferred_currency) when one is set; otherwise the UI
-// language picks it: English -> USD, Hungarian -> HUF.
+// language picks it: English/Italian -> USD, Hungarian -> HUF.
 // UI.money/formatDate/formatDateTime register every rendered string here, and
 // FX.refresh() rewrites text nodes (plus translated attributes) whenever the
 // language, preferred currency or the exchange rates change — a switch
@@ -124,7 +124,7 @@
   function langCode() {
     if (global.I18N && I18N.lang) return I18N.lang();
     var l = document.documentElement && document.documentElement.lang;
-    return l === 'hu' ? 'hu' : 'en';
+    return (l === 'hu' || l === 'it') ? l : 'en';
   }
 
   function displayCurrency() {
@@ -145,7 +145,10 @@
 
   function fiats() { return DISP_FIATS.slice(); }
 
-  function locale() { return langCode() === 'hu' ? 'hu-HU' : 'en-US'; }
+  function locale() {
+    var code = langCode();
+    return code === 'hu' ? 'hu-HU' : (code === 'it' ? 'it-IT' : 'en-US');
+  }
   function isFiat(code) { return !!FIAT[String(code || '').toUpperCase()]; }
 
   function getRate(from, to) {
